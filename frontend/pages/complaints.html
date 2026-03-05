@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>City Complaints – CleanCity</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .complaints-page{padding-top:var(--nav-height);min-height:100vh;background:var(--gray-50)}
+    .complaints-header-inner{display:flex;align-items:flex-start;justify-content:space-between;gap:1.5rem;flex-wrap:wrap}
+    .complaints-title{font-family:var(--font-display);font-size:2rem;font-weight:600;color:var(--gray-900)}
+    .complaints-sub{color:var(--gray-500);margin-top:0.25rem}
+    .filters-bar{display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;margin-top:1.25rem}
+    .filter-chip{padding:6px 14px;border-radius:var(--radius-full);font-size:0.8rem;font-weight:600;border:1.5px solid var(--gray-200);color:var(--gray-600);cursor:pointer;transition:all 0.2s;background:white}
+    .filter-chip:hover{border-color:var(--green-300);color:var(--green-600);background:var(--green-50)}
+    .filter-chip.active{border-color:var(--green-500);background:var(--green-500);color:white}
+    .filter-select{padding:6px 10px;border-radius:var(--radius-md);border:1.5px solid var(--gray-200);font-size:0.8rem;font-family:var(--font-body);color:var(--gray-700);cursor:pointer;outline:none}
+    .filter-select:focus{border-color:var(--green-500)}
+    .complaints-content{padding:2rem 0}
+    .complaints-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.5rem}
+    .complaint-card{background:white;border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden;transition:all 0.25s;cursor:pointer}
+    .complaint-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+    .complaint-card-img{height:160px;background:var(--gray-100);position:relative;overflow:hidden}
+    .complaint-card-img img{width:100%;height:100%;object-fit:cover}
+    .complaint-card-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem;background:linear-gradient(135deg,var(--gray-100),var(--gray-50))}
+    .complaint-card-body{padding:1.25rem}
+    .complaint-card-cat{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem}
+    .complaint-card-cat-icon{font-size:1rem}
+    .complaint-card-cat-label{font-size:0.75rem;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.06em}
+    .complaint-card-title{font-weight:600;color:var(--gray-900);margin-bottom:0.5rem;font-size:0.95rem;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .complaint-card-location{font-size:0.8rem;color:var(--gray-400);margin-bottom:1rem;display:flex;align-items:center;gap:4px}
+    .complaint-card-footer{display:flex;align-items:center;justify-content:space-between}
+    .vote-btn{display:flex;align-items:center;gap:0.4rem;padding:6px 12px;border-radius:var(--radius-full);border:1.5px solid var(--gray-200);font-size:0.8rem;font-weight:600;color:var(--gray-600);transition:all 0.2s;background:white;cursor:pointer}
+    .vote-btn:hover{border-color:var(--green-400);color:var(--green-600);background:var(--green-50)}
+    .vote-btn.voted{border-color:var(--green-500);background:var(--green-500);color:white}
+    .vote-btn.bounce{animation:bounce 0.3s ease}
+    .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:2000;opacity:0;pointer-events:none;transition:opacity 0.3s}
+    .drawer-overlay.open{opacity:1;pointer-events:all}
+    /* Desktop: slides in from right */
+    .drawer{position:fixed;right:0;top:0;bottom:0;width:480px;max-width:100vw;background:white;z-index:2001;transform:translateX(100%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;overflow:hidden}
+    .drawer.open{transform:translateX(0)}
+    .drawer-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:white;z-index:1}
+    .drawer-close{width:32px;height:32px;border-radius:50%;background:var(--gray-100);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;transition:background 0.2s}
+    .drawer-close:hover{background:var(--gray-200)}
+    /* Body scrolls, never overflows */
+    .drawer-body{padding:1.25rem 1.5rem;flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+    .load-more-area{text-align:center;padding:2rem 0}
+    /* Mobile: slides up from bottom */
+    @media(max-width:768px){
+      .complaints-grid{grid-template-columns:1fr}
+      .drawer{top:auto;bottom:0;width:100%;height:88vh;border-radius:16px 16px 0 0;transform:translateY(100%)}
+      .drawer.open{transform:translateY(0)}
+      .drawer-header{padding:1rem 1.25rem}
+      .drawer-body{padding:1rem 1.25rem}
+    }
+
+    /* Comments */
+    .comment-item{display:flex;gap:0.75rem;margin-bottom:1rem;align-items:flex-start}
+    .comment-avatar{width:32px;height:32px;border-radius:50%;background:var(--green-600);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0}
+    .comment-content{flex:1;background:var(--gray-50);border-radius:var(--radius-md);padding:0.65rem 0.85rem}
+    .comment-header{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem;flex-wrap:wrap}
+    .comment-author{font-weight:700;font-size:0.82rem;color:var(--gray-800)}
+    .comment-time{font-size:0.75rem;color:var(--gray-400)}
+    .comment-delete{margin-left:auto;background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:0.75rem;padding:0;transition:color 0.2s}
+    .comment-delete:hover{color:#e53e3e}
+    .comment-text{font-size:0.875rem;color:var(--gray-700);line-height:1.6;word-break:break-word}
+  </style>
+</head>
+<body>
+<nav class="navbar scrolled" style="background:white">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo"><div class="nav-logo-icon">♻</div> CleanCity</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="complaints.html" class="active">Complaints</a></li>
+      <li><a href="track.html">Track</a></li>
+      <li><a href="report.html">Report Waste</a></li>
+    </ul>
+    <div class="nav-actions" id="navActions"></div>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">🏠 Home</a>
+  <a href="complaints.html">📋 Complaints</a>
+  <a href="track.html">🔍 Track</a>
+  <a href="report.html">📢 Report Waste</a>
+</div>
+
+<div class="complaints-page">
+  <div style="background:white;border-bottom:1px solid var(--gray-100);padding:2rem 0">
+    <div class="container">
+      <div class="complaints-header-inner">
+        <div>
+          <h1 class="complaints-title" id="pageTitle">📋 City Complaints</h1>
+          <p class="complaints-sub" id="pageSubtitle">Public reports from citizens across the city</p>
+        </div>
+        <a href="report.html" class="btn btn-primary">+ Report Waste</a>
+      </div>
+      <div class="filters-bar" id="mineFilterBar">
+        <!-- Status filter — values match backend: submitted, in_progress, resolved -->
+        <button class="filter-chip active" data-status="">All</button>
+        <button class="filter-chip" data-status="submitted">Submitted</button>
+        <button class="filter-chip" data-status="in_progress">In Progress</button>
+        <button class="filter-chip" data-status="resolved">Resolved</button>
+        <select class="filter-select" id="categoryFilter">
+          <option value="">All Categories</option>
+          <option value="garbage">Garbage</option>
+          <option value="drainage">Drainage</option>
+          <option value="illegal_dumping">Illegal Dumping</option>
+          <option value="broken_infrastructure">Infrastructure</option>
+          <option value="public_hygiene">Public Hygiene</option>
+          <option value="other">Other</option>
+        </select>
+        <select class="filter-select" id="sortFilter">
+          <option value="latest">Latest First</option>
+          <option value="trending">Most Voted</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="complaints-content">
+    <div class="container">
+      <div class="complaints-grid" id="complaintsGrid">
+        <div class="skeleton" style="height:300px;border-radius:var(--radius-lg)"></div>
+        <div class="skeleton" style="height:300px;border-radius:var(--radius-lg)"></div>
+        <div class="skeleton" style="height:300px;border-radius:var(--radius-lg)"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div style="font-weight:700;font-size:1rem" id="drawerTitle">Complaint Details</div>
+    <div class="drawer-close" onclick="closeDrawer()">✕</div>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</div>
+
+
+
+
+<script src="../js/core/api.config.js?v=10"></script>
+<script src="../js/ui/complaints.ui.js?v=10"></script>
+</body>
+</html>

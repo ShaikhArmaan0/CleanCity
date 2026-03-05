@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Login – CleanCity</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    body{min-height:100vh;background:linear-gradient(135deg,var(--green-50) 0%,var(--beige-50) 100%);display:flex;flex-direction:column}
+    .auth-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:5.5rem 1rem 2rem}
+    .auth-card{background:white;border-radius:var(--radius-xl);box-shadow:0 24px 80px rgba(0,0,0,.10);padding:2.5rem;width:100%;max-width:440px;animation:fadeInUp .45s ease both}
+    /* logo */
+    .auth-logo{text-align:center;margin-bottom:1.75rem}
+    .auth-logo-icon{width:56px;height:56px;background:var(--green-600);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto .6rem}
+    .auth-logo-text{font-family:var(--font-display);font-size:1.5rem;font-weight:600;color:var(--green-700)}
+    /* tabs */
+    .auth-tabs{display:flex;border:1.5px solid var(--gray-200);border-radius:var(--radius-md);overflow:hidden;margin-bottom:1.75rem}
+    .auth-tab{flex:1;padding:.65rem;font-size:.875rem;font-weight:600;text-align:center;cursor:pointer;background:white;color:var(--gray-500);border:none;transition:all .2s;font-family:var(--font-body)}
+    .auth-tab.active{background:var(--green-600);color:white}
+    /* step dots */
+    .step-indicator{display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:1.5rem}
+    .step-dot{width:8px;height:8px;border-radius:50%;background:var(--gray-200);transition:all .3s}
+    .step-dot.active{background:var(--green-500);width:22px;border-radius:4px}
+    .step-dot.done{background:var(--green-300)}
+    /* otp row */
+    .otp-row{display:flex;gap:.6rem;justify-content:center;margin:1rem 0}
+    .otp-input{width:46px;height:54px;text-align:center;font-size:1.3rem;font-weight:700;border:1.5px solid var(--gray-300);border-radius:var(--radius-md);outline:none;transition:all .2s;color:var(--gray-900);font-family:var(--font-body)}
+    .otp-input:focus{border-color:var(--green-500);box-shadow:0 0 0 3px rgba(58,148,96,.12)}
+    .otp-input.filled{border-color:var(--green-400);background:var(--green-50)}
+    .otp-input.error{border-color:#e53e3e;animation:shake .4s ease}
+    .phone-display{font-size:1rem;font-weight:600;color:var(--gray-700);text-align:center;margin-bottom:.4rem}
+    .resend-row{text-align:center;font-size:.83rem;color:var(--gray-500);margin-top:.85rem}
+    .resend-row button{color:var(--green-600);font-weight:600;background:none;border:none;cursor:pointer;font-size:inherit;padding:0}
+    .resend-row button:disabled{color:var(--gray-400);cursor:default}
+    /* dev banner */
+    .dev-banner{background:var(--green-50);border:1px solid var(--green-200);border-radius:var(--radius-md);padding:.65rem 1rem;font-size:.82rem;color:var(--green-700);text-align:center;margin-bottom:1rem;display:none}
+    .dev-banner.show{display:block}
+    /* error block */
+    .err-block{background:#fff5f5;border:1px solid #fed7d7;color:#c53030;border-radius:var(--radius-md);padding:.6rem .9rem;font-size:.83rem;margin-bottom:1rem;display:none}
+    .err-block.show{display:block}
+    /* grid */
+    .form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:0 1rem}
+    /* link row */
+    .auth-link-row{text-align:center;font-size:.875rem;color:var(--gray-500);margin-top:1.25rem}
+    .auth-link-row a,.auth-link-row button.link-btn{color:var(--green-600);font-weight:600;background:none;border:none;cursor:pointer;font-size:inherit;padding:0;text-decoration:underline}
+    /* signup hint */
+    .signup-hint{background:var(--green-50);border:1.5px solid var(--green-200);border-radius:var(--radius-md);padding:.8rem 1rem;text-align:center;font-size:.875rem;color:var(--gray-600);margin-top:1rem}
+    .signup-hint a{color:var(--green-700);font-weight:700}
+    /* step hidden */
+    .step.hidden{display:none}
+    @media(max-width:480px){.form-grid-2{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<nav class="navbar" style="background:white;box-shadow:var(--shadow-sm)">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo"><div class="nav-logo-icon">♻</div> CleanCity</a>
+    <div style="margin-left:auto">
+      <a href="complaints.html" class="btn btn-ghost btn-sm">Browse Complaints</a>
+    </div>
+  </div>
+</nav>
+
+<div class="auth-wrap">
+
+  <!-- ══════════════════════════════════════
+       SCREEN 1 – Login (OTP or Password)
+  ══════════════════════════════════════ -->
+  <div class="auth-card" id="screenLogin">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">♻️</div>
+      <div class="auth-logo-text">CleanCity</div>
+    </div>
+
+    <div class="dev-banner" id="devOtpBanner">
+      🔧 Dev Mode — OTP: <strong id="devOtpCode"></strong>
+    </div>
+
+    <!-- tabs -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabOtp">📱 OTP Login</button>
+      <button class="auth-tab" id="tabPassword">🔑 Password</button>
+    </div>
+
+    <!-- ── OTP section ── -->
+    <div id="otpLoginSection">
+      <div class="step-indicator">
+        <div class="step-dot active" id="dot1"></div>
+        <div class="step-dot" id="dot2"></div>
+      </div>
+
+      <!-- step 1: phone -->
+      <div id="step1" class="step">
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="tel" id="phoneInput" class="form-input" placeholder="+91 98765 43210" maxlength="16" autocomplete="tel">
+          <div class="form-error hidden" id="phoneError">Enter a valid phone number (10–15 digits)</div>
+        </div>
+        <button class="btn btn-primary btn-full" id="sendOtpBtn">Send OTP →</button>
+      </div>
+
+      <!-- step 2: OTP -->
+      <div id="step2" class="step hidden">
+        <div class="phone-display" id="phoneDisplay"></div>
+        <p style="text-align:center;color:var(--gray-500);font-size:.875rem;margin-bottom:.5rem">Enter the 6-digit OTP sent to your phone</p>
+        <div class="otp-row">
+          <input class="otp-input" type="text" maxlength="1" inputmode="numeric" autocomplete="one-time-code">
+          <input class="otp-input" type="text" maxlength="1" inputmode="numeric">
+          <input class="otp-input" type="text" maxlength="1" inputmode="numeric">
+          <input class="otp-input" type="text" maxlength="1" inputmode="numeric">
+          <input class="otp-input" type="text" maxlength="1" inputmode="numeric">
+          <input class="otp-input" type="text" maxlength="1" inputmode="numeric">
+        </div>
+        <button class="btn btn-primary btn-full" id="verifyOtpBtn">Verify OTP</button>
+        <div class="resend-row">
+          Didn't receive it?
+          <button id="resendBtn" disabled>Resend OTP (60s)</button>
+        </div>
+        <div style="text-align:center;margin-top:.6rem">
+          <button class="btn btn-ghost btn-sm" onclick="goBackToPhone()">← Change number</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Password section ── -->
+    <div id="passwordLoginSection" style="display:none">
+      <div class="err-block" id="pwdError"></div>
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input type="tel" id="pwdPhone" class="form-input" placeholder="+91 98765 43210" maxlength="16" autocomplete="tel">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" id="pwdPassword" class="form-input" placeholder="Your password" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary btn-full" id="passwordLoginBtn">Sign In →</button>
+      <div class="auth-link-row" style="margin-top:.75rem">
+        <button class="link-btn" id="showForgotBtn">Forgot password?</button>
+      </div>
+    </div>
+
+    <div class="signup-hint">
+      Don't have an account?
+      <a href="#" id="goToOtpTab">Register with OTP →</a>
+      <br><span style="font-size:.78rem;color:var(--gray-400)">(OTP verifies your phone and creates account in one step)</span>
+    </div>
+    <div class="auth-link-row"><a href="index.html">← Back to Home</a></div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCREEN 2 – Registration
+  ══════════════════════════════════════ -->
+  <div class="auth-card" id="screenRegister" style="display:none;max-width:480px">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">🌿</div>
+      <div class="auth-logo-text">Create Account</div>
+    </div>
+    <p style="text-align:center;color:var(--gray-500);font-size:.9rem;margin-bottom:1.25rem">
+      Phone verified ✅ — fill in your details to finish
+    </p>
+
+    <div class="err-block" id="regError"></div>
+
+    <div class="form-group">
+      <label class="form-label">Full Name *</label>
+      <input type="text" id="regName" class="form-input" placeholder="Your full name" autocomplete="name">
+    </div>
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label class="form-label">Password *</label>
+        <input type="password" id="regPassword" class="form-input" placeholder="Min 6 chars" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm Password *</label>
+        <input type="password" id="regPasswordConfirm" class="form-input" placeholder="Repeat" autocomplete="new-password">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email <span style="color:var(--gray-400)">(optional)</span></label>
+      <input type="email" id="regEmail" class="form-input" placeholder="your@email.com" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Address / Area <span style="color:var(--gray-400)">(optional)</span></label>
+      <input type="text" id="regAddress" class="form-input" placeholder="Your neighbourhood or city">
+    </div>
+    <button class="btn btn-primary btn-full" id="registerBtn">Create Account →</button>
+    <div class="auth-link-row">
+      Already have an account?
+      <button class="link-btn" id="backToLoginBtn">Back to Login</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCREEN 3 – Forgot Password
+  ══════════════════════════════════════ -->
+  <div class="auth-card" id="screenForgot" style="display:none">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">🔑</div>
+      <div class="auth-logo-text">Forgot Password</div>
+    </div>
+    <p style="text-align:center;color:var(--gray-500);font-size:.9rem;margin-bottom:1.5rem">
+      Enter your registered phone number to reset your password
+    </p>
+
+    <div class="dev-banner" id="forgotDevBanner">
+      🔧 Dev Mode — Reset OTP: <strong id="forgotDevOtp"></strong>
+    </div>
+    <div class="err-block" id="forgotError"></div>
+
+    <div class="form-group">
+      <label class="form-label">Phone Number</label>
+      <input type="tel" id="forgotPhone" class="form-input" placeholder="+91 98765 43210" maxlength="16" autocomplete="tel">
+    </div>
+    <button class="btn btn-primary btn-full" id="sendForgotOtpBtn">Send Reset OTP →</button>
+
+    <!-- Step 2: OTP + new password (hidden until OTP sent) -->
+    <div id="forgotOtpSection" style="display:none;margin-top:1.25rem;border-top:1px solid var(--gray-100);padding-top:1.25rem">
+      <div class="form-group">
+        <label class="form-label">OTP Code</label>
+        <input type="text" id="forgotOtp" class="form-input" placeholder="6-digit OTP" maxlength="6" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label class="form-label">New Password</label>
+        <input type="password" id="newPassword" class="form-input" placeholder="Min 6 characters" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm New Password</label>
+        <input type="password" id="confirmNewPassword" class="form-input" placeholder="Repeat new password" autocomplete="new-password">
+      </div>
+      <button class="btn btn-primary btn-full" id="resetPasswordBtn">Reset Password →</button>
+    </div>
+
+    <div class="auth-link-row">
+      <button class="link-btn" id="backFromForgotBtn">← Back to Login</button>
+    </div>
+  </div>
+
+</div><!-- /auth-wrap -->
+
+<script src="../js/core/api.config.js?v=2"></script>
+<script src="../js/ui/login.ui.js"></script>
+</body>
+</html>

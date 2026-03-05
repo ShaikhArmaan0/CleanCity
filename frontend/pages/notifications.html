@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Notifications – CleanCity</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .notif-page{padding-top:var(--nav-height);min-height:100vh;background:var(--gray-50)}
+    .notif-container{max-width:720px;margin:0 auto;padding:2.5rem 1.5rem}
+    .notif-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.75rem;flex-wrap:wrap;gap:1rem}
+    .notif-title{font-family:var(--font-display);font-size:1.75rem;font-weight:600;color:var(--gray-900)}
+    .notif-subtitle{color:var(--gray-500);font-size:0.9rem;margin-top:0.2rem}
+    /* Tabs */
+    .notif-tabs{display:flex;border-bottom:2px solid var(--gray-200);margin-bottom:1.5rem;gap:0}
+    .notif-tab{padding:0.6rem 1.25rem;font-weight:600;font-size:0.875rem;color:var(--gray-500);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;font-family:var(--font-body)}
+    .notif-tab.active{color:var(--green-600);border-bottom-color:var(--green-500)}
+    /* Item */
+    .notif-list{display:flex;flex-direction:column;gap:0.75rem}
+    .notif-item{background:white;border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:1.1rem 1.25rem;display:flex;gap:1rem;align-items:flex-start;cursor:pointer;transition:all 0.2s;border-left:3px solid transparent;animation:fadeInUp 0.3s ease both}
+    .notif-item:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+    .notif-item.unread{border-left-color:var(--green-500);background:linear-gradient(to right,var(--green-50),white)}
+    .notif-icon{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+    .notif-icon.vote{background:var(--green-100)}
+    .notif-icon.status{background:#EBF8FF}
+    .notif-icon.comment{background:#FFF5F7}
+    .notif-icon.system{background:var(--gray-100)}
+    .notif-body{flex:1;min-width:0}
+    .notif-msg{font-size:0.9rem;color:var(--gray-800);line-height:1.5;margin-bottom:0.3rem}
+    .notif-meta{font-size:0.78rem;color:var(--gray-400);display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap}
+    .notif-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.72rem;font-weight:700}
+    .notif-badge.vote{background:var(--green-100);color:var(--green-700)}
+    .notif-badge.status{background:#BEE3F8;color:#2B6CB0}
+    .notif-badge.comment{background:#FED7E2;color:#97266D}
+    .notif-dot{width:8px;height:8px;border-radius:50%;background:var(--green-500);flex-shrink:0;margin-top:4px}
+    /* Empty */
+    .notif-empty{text-align:center;padding:4rem 1rem;color:var(--gray-400)}
+    .notif-empty-icon{font-size:4rem;margin-bottom:1rem}
+    .notif-empty-title{font-size:1.1rem;font-weight:600;color:var(--gray-600);margin-bottom:0.5rem}
+    /* Top bar */
+    .notif-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+    .unread-count{font-size:0.85rem;color:var(--gray-500)}
+    .unread-count strong{color:var(--green-700)}
+  </style>
+</head>
+<body>
+<nav class="navbar scrolled">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo"><div class="nav-logo-icon">♻</div> CleanCity</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="complaints.html">Complaints</a></li>
+      <li><a href="track.html">Track</a></li>
+      <li><a href="report.html">Report</a></li>
+    </ul>
+    <div class="nav-actions" id="navActions"></div>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">🏠 Home</a>
+  <a href="dashboard.html">📊 Dashboard</a>
+  <a href="complaints.html">📋 Complaints</a>
+  <a href="report.html">📢 Report</a>
+  <a href="#" onclick="logout()">🚪 Logout</a>
+</div>
+
+<div class="notif-page">
+  <div class="notif-container">
+
+    <div class="notif-header">
+      <div>
+        <div class="notif-title">🔔 Notifications</div>
+        <div class="notif-subtitle">Stay updated on your reports and community activity</div>
+      </div>
+      <a href="dashboard.html" class="btn btn-ghost btn-sm">← Dashboard</a>
+    </div>
+
+    <!-- Tabs: All / Unread -->
+    <div class="notif-tabs">
+      <button class="notif-tab active" id="tabAll">All</button>
+      <button class="notif-tab" id="tabUnread">Unread <span id="unreadTabBadge"></span></button>
+    </div>
+
+    <div class="notif-topbar">
+      <div class="unread-count" id="unreadSummary">Loading…</div>
+      <button class="btn btn-ghost btn-sm" id="markAllReadBtn" style="display:none">✓ Mark all as read</button>
+    </div>
+
+    <div class="notif-list" id="notifList">
+      <!-- Loaded by JS -->
+    </div>
+
+  </div>
+</div>
+
+<script src="../js/core/api.config.js?v=2"></script>
+<script src="../js/ui/notifications.ui.js"></script>
+</body>
+</html>

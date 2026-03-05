@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CleanCity – Waste Reporting & Tracking</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* HERO */
+    .hero{min-height:100vh;display:flex;align-items:center;background:linear-gradient(160deg,var(--green-50) 0%,var(--beige-50) 60%,white 100%);position:relative;overflow:hidden;padding-top:var(--nav-height)}
+    .hero-bg{position:absolute;inset:0;pointer-events:none}
+    .hero-circle{position:absolute;border-radius:50%;opacity:0.08}
+    .hero-circle-1{width:600px;height:600px;background:var(--green-500);top:-100px;right:-150px}
+    .hero-circle-2{width:300px;height:300px;background:var(--beige-500);bottom:50px;left:-80px}
+    .hero-container{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:5rem 1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+    .hero-tag{display:inline-flex;align-items:center;gap:0.5rem;background:var(--green-100);color:var(--green-700);padding:5px 14px;border-radius:var(--radius-full);font-size:0.8rem;font-weight:600;margin-bottom:1.5rem}
+    .hero-tag-dot{width:8px;height:8px;background:var(--green-500);border-radius:50%;animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+    .hero-title{font-family:var(--font-display);font-size:clamp(2.2rem,5vw,3.8rem);font-weight:600;line-height:1.15;color:var(--gray-900);margin-bottom:1.25rem}
+    .hero-title span{color:var(--green-600);font-style:italic}
+    .hero-subtitle{font-size:1.1rem;color:var(--gray-500);line-height:1.7;margin-bottom:2rem;max-width:480px}
+    .hero-actions{display:flex;gap:1rem;flex-wrap:wrap}
+    .hero-stats{display:flex;gap:2rem;margin-top:2.5rem;padding-top:2rem;border-top:1px solid var(--gray-200)}
+    .hero-stat-num{font-family:var(--font-display);font-size:1.8rem;font-weight:600;color:var(--gray-900)}
+    .hero-stat-label{font-size:0.8rem;color:var(--gray-500);font-weight:500}
+    .hero-visual{position:relative;display:flex;align-items:center;justify-content:center}
+    .hero-phone{width:240px;height:420px;background:white;border-radius:32px;box-shadow:0 30px 80px rgba(0,0,0,0.15),0 0 0 8px rgba(255,255,255,0.5);position:relative;overflow:hidden;border:1px solid rgba(0,0,0,0.06)}
+    .hero-phone-notch{width:80px;height:22px;background:var(--gray-100);border-radius:0 0 12px 12px;margin:0 auto}
+    .hero-phone-content{padding:1rem}
+    .hero-phone-map{height:140px;background:linear-gradient(135deg,#d1fae5,#a7f3d0);border-radius:12px;margin-bottom:0.75rem;display:flex;align-items:center;justify-content:center;font-size:2rem}
+    .hero-phone-card{background:var(--gray-50);border-radius:10px;padding:0.75rem;margin-bottom:0.5rem}
+    .hero-phone-title{font-size:0.7rem;font-weight:600;color:var(--gray-700);margin-bottom:0.25rem}
+    .hero-phone-row{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem}
+    .hero-phone-dot{width:8px;height:8px;border-radius:50%;background:var(--green-500);flex-shrink:0}
+    .hero-phone-text{font-size:0.65rem;color:var(--gray-500)}
+    .hero-phone-badge{display:inline-block;font-size:0.6rem;padding:2px 6px;border-radius:99px;background:var(--green-100);color:var(--green-700);font-weight:600}
+    .float-icon{position:absolute;animation:float 3s ease-in-out infinite}
+    .float-icon-1{top:-20px;left:-30px;animation-delay:0s;font-size:2.5rem}
+    .float-icon-2{top:30px;right:-40px;animation-delay:0.5s;font-size:2rem}
+    .float-icon-3{bottom:40px;left:-50px;animation-delay:1s;font-size:1.8rem}
+    .float-icon-4{bottom:-10px;right:-20px;animation-delay:1.5s;font-size:2.2rem}
+    /* HOW IT WORKS */
+    .how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;position:relative}
+    .how-grid::before{content:'';position:absolute;top:40px;left:calc(16.6% + 1rem);right:calc(16.6% + 1rem);height:2px;background:linear-gradient(90deg,var(--green-200),var(--green-400),var(--green-200));z-index:0}
+    .how-card{text-align:center;position:relative;z-index:1}
+    .how-number{width:80px;height:80px;border-radius:50%;background:white;box-shadow:var(--shadow-md);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-family:var(--font-display);font-size:1.8rem;font-weight:600;color:var(--green-600);border:2px solid var(--green-100)}
+    .how-icon{font-size:1.8rem;margin-bottom:0.5rem}
+    .how-title{font-weight:700;font-size:1.1rem;margin-bottom:0.5rem;color:var(--gray-900)}
+    .how-desc{font-size:0.9rem;color:var(--gray-500);line-height:1.6}
+    /* STATS BAR */
+    .stats-bar{background:var(--green-700);padding:3.5rem 0}
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;text-align:center}
+    .stat-item-num{font-family:var(--font-display);font-size:2.5rem;font-weight:600;color:white;display:block}
+    .stat-item-label{font-size:0.875rem;color:rgba(255,255,255,0.7);margin-top:0.25rem}
+    /* CTA */
+    .cta-section{background:linear-gradient(135deg,var(--green-700),var(--green-900));padding:5rem 0;text-align:center;position:relative;overflow:hidden}
+    .cta-section::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+    .cta-title{font-family:var(--font-display);font-size:clamp(1.8rem,4vw,2.8rem);font-weight:600;color:white;margin-bottom:1rem}
+    .cta-sub{color:rgba(255,255,255,0.75);font-size:1.1rem;margin-bottom:2rem}
+    .cta-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+    @media(max-width:768px){
+      .hero-container{grid-template-columns:1fr;gap:2rem;padding:3rem 1rem}
+      .hero-visual{display:none}
+      .hero-stats{gap:1rem}
+      .how-grid{grid-template-columns:1fr;gap:1.5rem}
+      .how-grid::before{display:none}
+      .stats-grid{grid-template-columns:repeat(2,1fr)}
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar" id="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">♻</div>
+      CleanCity
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="complaints.html">Complaints</a></li>
+      <li><a href="track.html">Track</a></li>
+      <li><a href="report.html">Report Waste</a></li>
+    </ul>
+    <div class="nav-actions" id="navActions">
+      <a href="login.html" class="btn btn-secondary btn-sm">Login</a>
+      <a href="report.html" class="btn btn-primary btn-sm">Report Now</a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">🏠 Home</a>
+  <a href="complaints.html">📋 Complaints</a>
+  <a href="track.html">🔍 Track</a>
+  <a href="report.html">📢 Report Waste</a>
+  <div class="mobile-divider"></div>
+  <a href="login.html">Login</a>
+  <a href="dashboard.html">Dashboard</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg">
+    <div class="hero-circle hero-circle-1"></div>
+    <div class="hero-circle hero-circle-2"></div>
+  </div>
+  <div class="hero-container">
+    <div class="hero-content" style="animation:fadeInUp 0.7s ease both">
+      <div class="hero-tag">
+        <span class="hero-tag-dot"></span>
+        Community-Driven Civic Action
+      </div>
+      <h1 class="hero-title">
+        Clean Your City,<br>
+        <span>One Report</span><br>
+        at a Time
+      </h1>
+      <p class="hero-subtitle">
+        Report waste, track complaints, and drive real change in your city. Together, we build cleaner, healthier communities.
+      </p>
+      <div class="hero-actions">
+        <a href="report.html" class="btn btn-primary btn-lg">📢 Report Waste</a>
+        <a href="complaints.html" class="btn btn-secondary btn-lg">📋 View Complaints</a>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-num" data-counter id="stat-reports">—</div>
+          <div class="hero-stat-label">Total Reports</div>
+        </div>
+        <div>
+          <div class="hero-stat-num" data-counter id="stat-resolved">—</div>
+          <div class="hero-stat-label">Issues Resolved</div>
+        </div>
+        <div>
+          <div class="hero-stat-num" data-counter id="stat-citizens">—</div>
+          <div class="hero-stat-label">Active Citizens</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual" style="animation:fadeIn 1s ease 0.3s both">
+      <div class="float-icon float-icon-1">🗑️</div>
+      <div class="float-icon float-icon-2">♻️</div>
+      <div class="float-icon float-icon-3">📍</div>
+      <div class="float-icon float-icon-4">🌿</div>
+      <div class="hero-phone">
+        <div class="hero-phone-notch"></div>
+        <div class="hero-phone-content">
+          <div class="hero-phone-map">🗺️</div>
+          <div class="hero-phone-card">
+            <div class="hero-phone-title">Latest Report</div>
+            <div class="hero-phone-row">
+              <div class="hero-phone-dot"></div>
+              <span class="hero-phone-text">Garbage overflow near Park St</span>
+            </div>
+            <span class="hero-phone-badge">In Progress</span>
+          </div>
+          <div class="hero-phone-card">
+            <div class="hero-phone-title">Your Score</div>
+            <div class="hero-phone-row">
+              <span class="hero-phone-text" style="font-size:0.7rem;font-weight:700;color:var(--green-600)">🌟 Eco Warrior</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<section class="stats-bar">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="reveal">
+        <span class="stat-item-num" id="bar-reports">—</span>
+        <div class="stat-item-label">Reports Filed</div>
+      </div>
+      <div class="reveal reveal-delay-1">
+        <span class="stat-item-num" id="bar-resolved">—</span>
+        <div class="stat-item-label">Issues Resolved</div>
+      </div>
+      <div class="reveal reveal-delay-2">
+        <span class="stat-item-num" id="bar-citizens">—</span>
+        <div class="stat-item-label">Active Citizens</div>
+      </div>
+      <div class="reveal reveal-delay-3">
+        <span class="stat-item-num">Real-time</span>
+        <div class="stat-item-label">Status Tracking</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section" style="background:var(--gray-50)">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Simple Process</span>
+      <h2 class="section-title">How CleanCity Works</h2>
+      <p class="section-subtitle">Three simple steps to make your city cleaner and hold authorities accountable.</p>
+    </div>
+    <div class="how-grid">
+      <div class="how-card reveal">
+        <div class="how-number">1</div>
+        <div class="how-icon">📸</div>
+        <h3 class="how-title">Report an Issue</h3>
+        <p class="how-desc">Spot a problem? Report it instantly with photos, location, and a description. It takes under 2 minutes.</p>
+      </div>
+      <div class="how-card reveal reveal-delay-2">
+        <div class="how-number">2</div>
+        <div class="how-icon">🗳️</div>
+        <h3 class="how-title">Community Votes</h3>
+        <p class="how-desc">Citizens upvote pressing issues, pushing the most critical problems to the top for faster resolution.</p>
+      </div>
+      <div class="how-card reveal reveal-delay-3">
+        <div class="how-number">3</div>
+        <div class="how-icon">✅</div>
+        <h3 class="how-title">Track & Resolve</h3>
+        <p class="how-desc">Watch your complaint progress in real-time through our transparent status tracking system.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container" style="position:relative;z-index:1">
+    <h2 class="cta-title">Ready to Make a Difference?</h2>
+    <p class="cta-sub">Join thousands of citizens already creating cleaner communities.</p>
+    <div class="cta-actions">
+      <a href="login.html" class="btn btn-lg" style="background:white;color:var(--green-700)">Get Started Free</a>
+      <a href="complaints.html" class="btn btn-lg" style="background:rgba(255,255,255,0.15);color:white;border:1.5px solid rgba(255,255,255,0.3)">Browse Reports</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="nav-logo" style="color:white;margin-bottom:1rem">
+          <div class="nav-logo-icon">♻</div>CleanCity
+        </div>
+        <p class="footer-desc">A community-driven platform for transparent civic waste reporting and resolution tracking.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Twitter">𝕏</a>
+          <a href="#" aria-label="Facebook">f</a>
+          <a href="#" aria-label="Instagram">📷</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Platform</div>
+        <ul class="footer-links">
+          <li><a href="report.html">Report Waste</a></li>
+          <li><a href="complaints.html">View Complaints</a></li>
+          <li><a href="track.html">Track Status</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Account</div>
+        <ul class="footer-links">
+          <li><a href="login.html">Login</a></li>
+          <li><a href="login.html">Register</a></li>
+          <li><a href="dashboard.html">My Complaints</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Company</div>
+        <ul class="footer-links">
+          <li><a href="about.html">About</a></li>
+          <li><a href="privacy.html">Privacy Policy</a></li>
+          <li><a href="terms.html">Terms of Service</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2024 CleanCity. All rights reserved.</span>
+      <span>Made with 🌿 for cleaner cities</span>
+    </div>
+  </div>
+</footer>
+
+
+
+
+<script src="../js/core/api.config.js?v=2"></script>
+<script src="../js/ui/index.ui.js"></script>
+</body>
+</html>

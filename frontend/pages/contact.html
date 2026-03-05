@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Contact Us – CleanCity</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .info-page{padding-top:var(--nav-height);min-height:100vh;background:var(--gray-50)}
+    .info-hero{background:linear-gradient(135deg,var(--green-700),var(--green-900));padding:3.5rem 0;text-align:center;color:white}
+    .info-hero h1{font-family:var(--font-display);font-size:2.2rem;font-weight:600;margin-bottom:0.5rem}
+    .info-hero p{color:rgba(255,255,255,0.8);font-size:1rem}
+    .contact-content{max-width:900px;margin:3rem auto;padding:0 1.5rem 4rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem}
+    .contact-card{background:white;border-radius:var(--radius-xl);box-shadow:var(--shadow-md);padding:2.5rem}
+    .contact-card h2{font-family:var(--font-display);font-size:1.4rem;font-weight:600;color:var(--green-700);margin-bottom:1.5rem}
+    .contact-info-item{display:flex;gap:1rem;margin-bottom:1.5rem;align-items:flex-start}
+    .contact-icon{width:44px;height:44px;background:var(--green-100);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+    .contact-info-title{font-weight:700;color:var(--gray-900);margin-bottom:0.2rem;font-size:0.9rem}
+    .contact-info-value{color:var(--gray-600);font-size:0.9rem;line-height:1.5}
+    .contact-info-value a{color:var(--green-600)}
+    .form-success{background:var(--green-50);border:1px solid var(--green-200);border-radius:var(--radius-md);padding:1.5rem;text-align:center;display:none}
+    .form-success-icon{font-size:2.5rem;margin-bottom:0.5rem}
+    @media(max-width:640px){.contact-content{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<nav class="navbar scrolled" style="background:white">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo"><div class="nav-logo-icon">♻</div> CleanCity</a>
+    <div style="margin-left:auto;display:flex;gap:0.75rem">
+      <a href="index.html" class="btn btn-ghost btn-sm">Home</a>
+      <a href="login.html" class="btn btn-primary btn-sm">Login</a>
+    </div>
+  </div>
+</nav>
+
+<div class="info-page">
+  <div class="info-hero">
+    <h1>Contact Us</h1>
+    <p>Have a question, partnership proposal, or feedback? We'd love to hear from you.</p>
+  </div>
+
+  <div class="contact-content">
+    <!-- Contact info -->
+    <div class="contact-card">
+      <h2>Get in Touch</h2>
+
+      <div class="contact-info-item">
+        <div class="contact-icon">📧</div>
+        <div>
+          <div class="contact-info-title">General Enquiries</div>
+          <div class="contact-info-value"><a href="mailto:hello@cleancity.in">hello@cleancity.in</a></div>
+        </div>
+      </div>
+      <div class="contact-info-item">
+        <div class="contact-icon">🔒</div>
+        <div>
+          <div class="contact-info-title">Privacy & Data</div>
+          <div class="contact-info-value"><a href="mailto:privacy@cleancity.in">privacy@cleancity.in</a></div>
+        </div>
+      </div>
+      <div class="contact-info-item">
+        <div class="contact-icon">⚖️</div>
+        <div>
+          <div class="contact-info-title">Legal & Compliance</div>
+          <div class="contact-info-value"><a href="mailto:legal@cleancity.in">legal@cleancity.in</a></div>
+        </div>
+      </div>
+      <div class="contact-info-item">
+        <div class="contact-icon">🤝</div>
+        <div>
+          <div class="contact-info-title">Municipal Partnerships</div>
+          <div class="contact-info-value"><a href="mailto:gov@cleancity.in">gov@cleancity.in</a><br>For cities & municipalities looking to integrate CleanCity</div>
+        </div>
+      </div>
+      <div class="contact-info-item">
+        <div class="contact-icon">📞</div>
+        <div>
+          <div class="contact-info-title">Phone</div>
+          <div class="contact-info-value">+91 80 1234 5678<br><span style="font-size:0.78rem;color:var(--gray-400)">Mon–Fri, 9 AM – 6 PM IST</span></div>
+        </div>
+      </div>
+      <div class="contact-info-item">
+        <div class="contact-icon">📍</div>
+        <div>
+          <div class="contact-info-title">Office</div>
+          <div class="contact-info-value">CleanCity Technologies Pvt. Ltd.<br>Civic Hub, Koramangala<br>Bengaluru, Karnataka — 560001</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact form -->
+    <div class="contact-card">
+      <h2>Send a Message</h2>
+      <div class="form-success" id="formSuccess">
+        <div class="form-success-icon">✅</div>
+        <div style="font-weight:700;color:var(--green-700);margin-bottom:0.25rem">Message sent!</div>
+        <div style="color:var(--gray-500);font-size:0.9rem">We'll get back to you within 2 business days.</div>
+      </div>
+      <div id="contactForm">
+        <div class="form-group">
+          <label class="form-label">Your Name *</label>
+          <input type="text" id="ctName" class="form-input" placeholder="Full name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address *</label>
+          <input type="email" id="ctEmail" class="form-input" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subject *</label>
+          <select id="ctSubject" class="form-input" style="cursor:pointer">
+            <option value="">Select a topic…</option>
+            <option>General Question</option>
+            <option>Report a Bug</option>
+            <option>Feature Request</option>
+            <option>Municipal Partnership</option>
+            <option>Media / Press</option>
+            <option>Privacy Request</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Message *</label>
+          <textarea id="ctMessage" class="form-input" rows="5" placeholder="Tell us how we can help…" style="resize:vertical;font-family:var(--font-body)"></textarea>
+        </div>
+        <button class="btn btn-primary btn-full" id="ctSubmitBtn" onclick="submitContact()">Send Message →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© 2024 CleanCity. All rights reserved.</span>
+      <span><a href="index.html" style="color:rgba(255,255,255,0.6)">← Back to Home</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/core/api.config.js?v=2"></script>
+
+<script src="../js/ui/contact.ui.js"></script>
+</body>
+</html>

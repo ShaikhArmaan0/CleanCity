@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Track Complaint – CleanCity</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .track-page{padding-top:var(--nav-height);min-height:100vh;background:var(--gray-50)}
+    .track-hero{background:linear-gradient(135deg,var(--green-700),var(--green-900));padding:4rem 0;text-align:center;color:white}
+    .track-hero h1{font-family:var(--font-display);font-size:2.5rem;font-weight:600;margin-bottom:0.75rem}
+    .track-hero p{color:rgba(255,255,255,0.75);font-size:1.05rem;margin-bottom:2rem}
+    .track-input-row{display:flex;gap:0.75rem;max-width:520px;margin:0 auto;justify-content:center;flex-wrap:wrap}
+    .track-input{flex:1;min-width:240px;padding:0.85rem 1.25rem;border-radius:var(--radius-full);border:none;font-size:0.95rem;font-family:var(--font-body);outline:none;box-shadow:0 4px 20px rgba(0,0,0,0.15)}
+    .track-result{max-width:720px;margin:2.5rem auto;padding:0 1.5rem}
+    .complaint-detail-card{background:white;border-radius:var(--radius-xl);box-shadow:var(--shadow-md);overflow:hidden;margin-bottom:2rem}
+    .complaint-detail-header{padding:1.75rem 2rem;border-bottom:1px solid var(--gray-100);display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+    .complaint-detail-body{padding:1.75rem 2rem}
+    .detail-label{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--gray-400);margin-bottom:0.25rem}
+    .detail-value{font-size:0.95rem;color:var(--gray-700);font-weight:500}
+    .detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-bottom:1.5rem}
+    .timeline-card{background:white;border-radius:var(--radius-xl);box-shadow:var(--shadow-md);padding:2rem}
+    .timeline-title{font-weight:700;font-size:1.05rem;color:var(--gray-900);margin-bottom:1.75rem}
+    .timeline{position:relative;padding-left:2.5rem}
+    .timeline::before{content:'';position:absolute;left:16px;top:0;bottom:0;width:2px;background:var(--gray-200)}
+    .timeline-line-fill{position:absolute;left:16px;top:0;width:2px;background:var(--green-500);transition:height 1.5s ease;height:0}
+    .timeline-item{position:relative;padding-bottom:2rem}
+    .timeline-item:last-child{padding-bottom:0}
+    .timeline-dot{position:absolute;left:-2.5rem;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.85rem;border:3px solid white;box-shadow:0 0 0 2px var(--gray-200);transition:all 0.5s;background:white;color:var(--gray-400)}
+    .timeline-dot.done{background:var(--green-500);color:white;box-shadow:0 0 0 2px var(--green-300)}
+    .timeline-dot.current{background:var(--orange);color:white;box-shadow:0 0 0 3px rgba(245,132,44,0.2)}
+    .timeline-item-title{font-weight:700;font-size:0.95rem;color:var(--gray-400);margin-bottom:0.25rem}
+    .timeline-item-title.active{color:var(--gray-900)}
+    .timeline-item-date{font-size:0.8rem;color:var(--gray-400)}
+    .timeline-item-desc{font-size:0.85rem;color:var(--gray-500);margin-top:0.25rem}
+    .not-found{text-align:center;padding:3rem;background:white;border-radius:var(--radius-xl);box-shadow:var(--shadow-md)}
+    @media(max-width:600px){.detail-grid{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+<nav class="navbar scrolled" style="background:white">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo"><div class="nav-logo-icon">♻</div> CleanCity</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="complaints.html">Complaints</a></li>
+      <li><a href="track.html" class="active">Track</a></li>
+      <li><a href="report.html">Report Waste</a></li>
+    </ul>
+    <div class="nav-actions" id="navActions"></div>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">🏠 Home</a>
+  <a href="complaints.html">📋 Complaints</a>
+  <a href="track.html">🔍 Track</a>
+  <a href="report.html">📢 Report Waste</a>
+</div>
+
+<div class="track-page">
+  <div class="track-hero">
+    <h1>🔍 Track Your Complaint</h1>
+    <p>Enter your complaint ID to see real-time status and progress</p>
+    <div class="track-input-row">
+      <input type="text" class="track-input" id="trackInput" placeholder="Enter Complaint ID...">
+      <button class="btn btn-primary" id="trackBtn">Track</button>
+    </div>
+  </div>
+  <div class="track-result" id="trackResult" style="display:none"></div>
+</div>
+
+
+
+
+<script src="../js/core/api.config.js?v=2"></script>
+<script src="../js/ui/track.ui.js"></script>
+</body>
+</html>
