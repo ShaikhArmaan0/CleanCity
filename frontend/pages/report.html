@@ -149,6 +149,10 @@
         </div>
         <div id="map"></div>
         <p id="mapHint" style="font-size:0.8rem;color:var(--gray-400);margin-bottom:1rem">📌 Tap the map to pin your location · drag the pin to adjust</p>
+        <div class="form-group">
+          <label class="form-label">Region / Locality <span style="color:var(--gray-400);font-weight:400">(e.g. Chembur East, Andheri West)</span></label>
+          <input type="text" id="regionInput" class="form-input" placeholder="Neighbourhood / locality name — auto-filled from map or type manually">
+        </div>
         <div class="form-nav">
           <button class="btn btn-ghost" onclick="goToStep(1)">← Back</button>
           <button class="btn btn-primary" id="next2Btn">Next →</button>
@@ -251,7 +255,7 @@
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="../js/core/api.config.js?v=2"></script>
-<script src="../js/ui/report.ui.js"></script>
+<script src="../js/core/api.config.js?v=12"></script>
+<script src="../js/ui/report.ui.js?v=11"></script>
 </body>
 </html>

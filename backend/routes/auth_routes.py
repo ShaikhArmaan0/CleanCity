@@ -56,9 +56,10 @@ def verify_otp():
             "temp_token": temp_token,
             "token": real_token,
             "user": {
-                "name": existing_user["name"],
+                "_id":   str(existing_user["_id"]),
+                "name":  existing_user["name"],
                 "phone": existing_user["phone"],
-                "role": existing_user.get("role", "citizen"),
+                "role":  existing_user.get("role", "citizen"),
             }
         }), 200
 
@@ -109,7 +110,12 @@ def complete_profile():
     return jsonify({
         "message": "Account created successfully",
         "token": token,
-        "user": {"name": name, "phone": phone, "role": "citizen"}
+        "user": {
+            "_id":   str(result.inserted_id),
+            "name":  name,
+            "phone": phone,
+            "role":  "citizen",
+        }
     }), 201
 
 
@@ -129,6 +135,9 @@ def login():
     if not verify_password(password, user["password"]):
         return jsonify({"error": "Incorrect password"}), 401
 
+    if user.get("role") in ("authority", "admin"):
+        return jsonify({"error": "Authority and admin accounts must use the Admin Panel to log in."}), 403
+
     extensions.db.users.update_one({"_id": user["_id"]}, {"$set": {"last_login": datetime.utcnow()}})
     token = create_access_token(identity=str(user["_id"]))
 
@@ -136,6 +145,7 @@ def login():
         "message": "Login successful",
         "token":   token,
         "user": {
+            "_id":   str(user["_id"]),
             "name":  user["name"],
             "phone": user["phone"],
             "role":  user.get("role", "citizen"),

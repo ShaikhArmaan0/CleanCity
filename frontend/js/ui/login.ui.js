@@ -2,8 +2,11 @@
    login.ui.js
    Screens: screenLogin → screenRegister | screenForgot
    ============================================================ */
+document.addEventListener('DOMContentLoaded', function () {
 
-// Only auto-redirect to dashboard if logged in AND not coming from a logout action
+
+// Only auto-redirect to dashboard if USER is logged in (cc_token) AND not coming from logout
+// Admin sessions (cc_admin_token) are SEPARATE — don't auto-redirect user login page
 const _fromLogout = new URLSearchParams(window.location.search).get('logout');
 if (!_fromLogout && Auth.isLoggedIn()) window.location.href = 'dashboard.html';
 
@@ -291,3 +294,5 @@ $('resetPasswordBtn').addEventListener('click', async () => {
 // ── Init ──────────────────────────────────────────────────────
 showScreen('screenLogin');
 showOtpStep(1);
+
+}); // end DOMContentLoaded

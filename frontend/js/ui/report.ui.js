@@ -1,4 +1,6 @@
 /* report.ui.js — Multi-step waste report form */
+document.addEventListener('DOMContentLoaded', function () {
+
 
 // ── Hamburger ──────────────────────────────────────────────────
 document.getElementById('hamburger').addEventListener('click', function () {
@@ -63,14 +65,38 @@ function initMap() {
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>',
   }).addTo(map);
-  map.on('click', e => { selectedLat = e.latlng.lat; selectedLng = e.latlng.lng; placeMarker(e.latlng); });
+  map.on('click', e => {
+    selectedLat = e.latlng.lat;
+    selectedLng = e.latlng.lng;
+    placeMarker(e.latlng);
+    // Reverse geocode on pin drop
+    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${selectedLat}&lon=${selectedLng}&format=json`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.display_name) document.getElementById('addressInput').value = d.display_name;
+        const a = d.address || {};
+        const reg = a.suburb || a.neighbourhood || a.quarter || a.village || a.town || a.city_district || '';
+        if (reg) document.getElementById('regionInput').value = reg;
+      }).catch(() => {});
+  });
 }
 
 function placeMarker(latlng) {
   if (marker) marker.setLatLng(latlng);
   else {
     marker = L.marker(latlng, { draggable: true }).addTo(map);
-    marker.on('dragend', ev => { selectedLat = ev.target.getLatLng().lat; selectedLng = ev.target.getLatLng().lng; });
+    marker.on('dragend', ev => {
+      selectedLat = ev.target.getLatLng().lat;
+      selectedLng = ev.target.getLatLng().lng;
+      fetch(`https://nominatim.openstreetmap.org/reverse?lat=${selectedLat}&lon=${selectedLng}&format=json`)
+        .then(r => r.json())
+        .then(d => {
+          if (d.display_name) document.getElementById('addressInput').value = d.display_name;
+          const a = d.address || {};
+          const reg = a.suburb || a.neighbourhood || a.quarter || a.village || a.town || a.city_district || '';
+          if (reg) document.getElementById('regionInput').value = reg;
+        }).catch(() => {});
+    });
   }
 }
 
@@ -107,6 +133,12 @@ document.getElementById('useLocationBtn').addEventListener('click', () => {
       fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
         .then(r => r.json()).then(d => {
           document.getElementById('addressInput').value = d.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          // Auto-fill region from geocode suburb/neighbourhood
+          const addr = d.address || {};
+          const region = addr.suburb || addr.neighbourhood || addr.quarter || addr.village || addr.town || '';
+          if (region && document.getElementById('regionInput')) {
+            document.getElementById('regionInput').value = region;
+          }
           status.textContent = '✅ Location detected'; status.style.color = 'var(--green-600)';
         }).catch(() => {
           document.getElementById('addressInput').value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
@@ -231,6 +263,7 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
     category:    selectedCategory,
     description: desc,
     address:     document.getElementById('addressInput').value.trim(),
+    region:      document.getElementById('regionInput') ? document.getElementById('regionInput').value.trim() : '',
     latitude:    selectedLat,
     longitude:   selectedLng,
     images:      uploadedImages,
@@ -356,3 +389,5 @@ async function camSwitchFacing() {
   await _startStream();
 }
 window.camSwitchFacing = camSwitchFacing;
+
+}); // end DOMContentLoaded

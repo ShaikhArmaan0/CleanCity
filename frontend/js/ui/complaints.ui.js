@@ -1,6 +1,8 @@
 /* ============================================================
    complaints.ui.js  –  City complaints feed + comment section
    ============================================================ */
+document.addEventListener('DOMContentLoaded', function () {
+
 
 // ── Hamburger ─────────────────────────────────────────────────
 document.getElementById('hamburger').addEventListener('click', function () {
@@ -10,7 +12,9 @@ document.getElementById('hamburger').addEventListener('click', function () {
 
 // ── Auth-aware nav ────────────────────────────────────────────
 document.getElementById('navActions').innerHTML = Auth.isLoggedIn()
-  ? '<a href="dashboard.html" class="btn btn-ghost btn-sm">Dashboard</a>'
+  ? `<a href="dashboard.html" class="btn btn-ghost btn-sm">Dashboard</a>
+     <a href="profile.html" class="btn btn-ghost btn-sm">👤 Profile</a>
+     <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>`
   : '<a href="login.html" class="btn btn-primary btn-sm">Login</a>';
 
 // ── URL param: ?mine=true shows only my complaints ─────────────
@@ -49,7 +53,7 @@ function createCard(c) {
   const voted = votedIds.has(id);
   const votes = c.votes || 0;
   return `
-    <div class="complaint-card" onclick="openDrawer('${id}', event)">
+    <div class="complaint-card" id="card-${id}" onclick="openDrawer('${id}', event)">
       <div class="complaint-card-img">
         ${c.images && c.images.length > 0
           ? `<img src="${c.images[0]}" alt="complaint photo" style="width:100%;height:100%;object-fit:cover;display:block;">`
@@ -151,6 +155,19 @@ async function handleVote(e, id) {
 }
 window.handleVote = handleVote;
 
+// ── getCurrentUserId: reads _id from stored user or decodes JWT ──
+// Needed because old sessions may not have _id in localStorage.
+function getCurrentUserId() {
+  const user = Auth.getUser();
+  if (user && user._id) return user._id;
+  try {
+    const token = Auth.getToken();
+    if (!token) return null;
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.sub || null;
+  } catch { return null; }
+}
+
 // ── Drawer ────────────────────────────────────────────────────
 let activeComplaintId = null;
 
@@ -196,6 +213,12 @@ async function openDrawer(id, event) {
         </button>
         <a href="track.html?id=${c._id}" class="btn btn-ghost btn-sm">🔍 Track Status</a>
         ${Auth.isLoggedIn() ? '<a href="report.html" class="btn btn-ghost btn-sm">+ Report Similar</a>' : ''}
+        ${Auth.isLoggedIn() && getCurrentUserId() === c.user_id
+          ? `<button class="btn btn-sm" onclick="deleteComplaint('${c._id}')"
+               style="background:#FEF2F2;color:#DC2626;border:1.5px solid #FECACA;font-weight:600;margin-left:auto;">
+               🗑 Delete Report
+             </button>`
+          : ''}
       </div>
 
       <div style="border-top:1px solid var(--gray-100);padding-top:1.25rem">
@@ -293,6 +316,26 @@ async function deleteComment(commentId, complaintId) {
   }
 }
 window.deleteComment = deleteComment;
+
+// ── Delete complaint (owner only) ─────────────────────────────
+async function deleteComplaint(complaintId) {
+  if (!confirm('Are you sure you want to delete this report?\nThis cannot be undone — all votes and comments will also be removed.')) return;
+  try {
+    await http(API.complaints.byId(complaintId), { method: 'DELETE' });
+    Toast.show('Report deleted', 'success');
+    closeDrawer();
+    const card = document.getElementById('card-' + complaintId);
+    if (card) {
+      card.style.transition = 'opacity 0.3s, transform 0.3s';
+      card.style.opacity = '0';
+      card.style.transform = 'scale(0.95)';
+      setTimeout(() => card.remove(), 320);
+    }
+  } catch (err) {
+    Toast.show(err.message || 'Failed to delete report', 'error');
+  }
+}
+window.deleteComplaint = deleteComplaint;
 
 // ── Close drawer ──────────────────────────────────────────────
 function closeDrawer() {
@@ -407,3 +450,5 @@ window.openLightbox  = openLightbox;
 window.closeLightbox = closeLightbox;
 window.lbNav         = lbNav;
 window.lbGoTo        = lbGoTo;
+
+}); // end DOMContentLoaded

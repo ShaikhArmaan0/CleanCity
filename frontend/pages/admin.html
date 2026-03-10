@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Panel – CleanCity</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Layout ─────────────────────────────────── */
+    :root { --sb-width: 252px; }
+    html, body { height: 100%; overflow: hidden; }
+    .admin-layout { display:grid; grid-template-columns:var(--sb-width) 1fr; height:calc(100vh - var(--nav-height)); margin-top:var(--nav-height); background:var(--gray-50); transition:grid-template-columns .25s ease; }
+    .admin-layout.collapsed { grid-template-columns:64px 1fr; }
+
+    /* ── Sidebar ─────────────────────────────────── */
+    .admin-sidebar { background:white; border-right:1px solid var(--gray-100); padding:1.25rem .75rem; height:100%; overflow-y:auto; overflow-x:hidden; display:flex; flex-direction:column; transition:all .25s ease; }
+    .collapsed .admin-sidebar { padding:1.25rem .5rem; }
+
+    .sb-brand { display:flex; align-items:center; gap:.6rem; padding:.25rem .25rem 1.1rem; border-bottom:1px solid var(--gray-100); margin-bottom:1rem; overflow:hidden; }
+    .sb-brand-icon { width:36px; height:36px; background:var(--green-600); border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+    .sb-brand-text { white-space:nowrap; overflow:hidden; }
+    .sb-brand-title { font-size:.88rem; font-weight:700; color:var(--gray-900); }
+    .sb-brand-sub { font-size:.68rem; color:var(--gray-400); }
+    .collapsed .sb-brand-text { display:none; }
+
+    .sb-sec { font-size:.65rem; font-weight:700; color:var(--gray-400); text-transform:uppercase; letter-spacing:.08em; padding:.25rem .5rem; margin-top:.75rem; white-space:nowrap; overflow:hidden; }
+    .collapsed .sb-sec { visibility:hidden; height:12px; }
+
+    .admin-nav { list-style:none; display:flex; flex-direction:column; gap:2px; }
+    .admin-nav li a { display:flex; align-items:center; gap:.65rem; padding:.6rem .6rem; border-radius:var(--radius-md); font-size:.875rem; font-weight:500; color:var(--gray-600); transition:all .18s; cursor:pointer; user-select:none; white-space:nowrap; overflow:hidden; }
+    .admin-nav li a:hover { background:var(--green-50); color:var(--green-700); }
+    .admin-nav li a.active { background:var(--green-50); color:var(--green-700); font-weight:700; }
+    .nav-ico { font-size:1.15rem; width:22px; text-align:center; flex-shrink:0; }
+    .nav-label { overflow:hidden; white-space:nowrap; }
+    .collapsed .nav-label { display:none; }
+    .nav-badge { margin-left:auto; background:var(--red); color:white; font-size:.62rem; font-weight:700; padding:1px 6px; border-radius:var(--radius-full); min-width:18px; text-align:center; flex-shrink:0; }
+    .collapsed .nav-badge { display:none !important; }
+
+    .sb-footer { margin-top:auto; padding-top:1rem; border-top:1px solid var(--gray-100); }
+    .admin-pill { display:flex; align-items:center; gap:.6rem; padding:.55rem .5rem; border-radius:var(--radius-md); background:var(--gray-50); overflow:hidden; cursor:pointer; transition:background .15s; }
+    .admin-pill:hover { background:var(--green-50); }
+    .admin-av { width:32px; height:32px; background:linear-gradient(135deg,var(--green-400),var(--green-600)); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.82rem; font-weight:700; color:white; flex-shrink:0; }
+    .admin-pill-text { overflow:hidden; white-space:nowrap; }
+    .admin-pill-name { font-size:.82rem; font-weight:700; color:var(--gray-800); }
+    .admin-pill-role { font-size:.68rem; color:var(--gray-400); text-transform:capitalize; }
+    .collapsed .admin-pill-text { display:none; }
+
+    /* Collapse toggle btn */
+    .collapse-btn { display:flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:var(--radius-full); border:1.5px solid var(--gray-200); background:white; color:var(--gray-500); cursor:pointer; font-size:.8rem; transition:all .18s; position:fixed; top:calc(var(--nav-height) + 12px); left:calc(var(--sb-width) - 14px); z-index:100; box-shadow:var(--shadow-sm); }
+    .collapse-btn:hover { background:var(--green-50); border-color:var(--green-300); color:var(--green-600); }
+    .admin-layout.collapsed .collapse-btn { left:50px; }
+
+    /* ── Main ─────────────────────────────────────── */
+    .admin-main { padding:2rem; overflow-y:auto; height:100%; }
+    .admin-section { display:none; }
+    .admin-section.active { display:block; animation:fadeInUp .22s ease; }
+    @keyframes fadeInUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    .sec-hdr { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:1.75rem; gap:1rem; flex-wrap:wrap; }
+    .sec-title { font-family:var(--font-display); font-size:1.55rem; font-weight:600; color:var(--gray-900); }
+    .sec-sub { font-size:.85rem; color:var(--gray-500); margin-top:.2rem; }
+    .hdr-actions { display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; }
+    .refresh-btn { display:flex; align-items:center; gap:.4rem; padding:.45rem 1rem; border-radius:var(--radius-full); background:white; border:1.5px solid var(--gray-200); color:var(--gray-600); font-size:.82rem; font-family:var(--font-body); cursor:pointer; transition:all .2s; white-space:nowrap; }
+    .refresh-btn:hover { border-color:var(--green-400); color:var(--green-700); background:var(--green-50); }
+    .btn-add { display:flex; align-items:center; gap:.4rem; padding:.45rem 1rem; border-radius:var(--radius-full); background:var(--green-600); border:none; color:white; font-size:.82rem; font-family:var(--font-body); font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap; }
+    .btn-add:hover { background:var(--green-700); }
+    .add-btn { display:flex; align-items:center; gap:.4rem; padding:.45rem 1rem; border-radius:var(--radius-full); background:var(--green-600); border:none; color:white; font-size:.82rem; font-family:var(--font-body); cursor:pointer; transition:all .2s; font-weight:600; box-shadow:0 2px 8px rgba(45,122,74,.25); }
+    .add-btn:hover { background:var(--green-700); transform:translateY(-1px); }
+
+    /* ── Stats ────────────────────────────────────── */
+    .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; margin-bottom:1.75rem; }
+    .stat-box { background:white; border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:1.25rem 1.5rem; border-top:3px solid var(--green-400); transition:all .25s; cursor:default; }
+    .stat-box:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
+    .stat-icon { font-size:1.6rem; margin-bottom:.6rem; }
+    .stat-num { font-family:var(--font-display); font-size:2rem; font-weight:600; color:var(--gray-900); line-height:1; }
+    .stat-label { font-size:.75rem; color:var(--gray-500); font-weight:500; text-transform:uppercase; letter-spacing:.05em; margin-top:.3rem; }
+    .stat-trend { font-size:.75rem; color:var(--green-600); margin-top:.4rem; font-weight:500; }
+
+    /* ── Charts ───────────────────────────────────── */
+    .charts-row { display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-bottom:1.75rem; }
+    .chart-card { background:white; border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:1.5rem; }
+    .chart-title { font-size:.9rem; font-weight:700; color:var(--gray-700); margin-bottom:1rem; }
+    .bar-row { display:flex; align-items:center; gap:.65rem; font-size:.8rem; margin-bottom:.55rem; }
+    .bar-label { width:130px; color:var(--gray-500); text-align:right; flex-shrink:0; text-transform:capitalize; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .bar-track { flex:1; background:var(--gray-100); border-radius:var(--radius-full); height:8px; overflow:hidden; }
+    .bar-fill { height:100%; border-radius:var(--radius-full); background:linear-gradient(90deg,var(--green-400),var(--green-600)); transition:width .9s ease; }
+    .bar-count { width:28px; color:var(--gray-400); font-size:.75rem; text-align:right; flex-shrink:0; }
+    .status-row { display:flex; align-items:center; gap:.75rem; margin-bottom:.75rem; }
+    .s-label { width:90px; font-size:.82rem; font-weight:600; flex-shrink:0; }
+    .s-track { flex:1; background:var(--gray-100); border-radius:var(--radius-full); height:10px; overflow:hidden; }
+    .s-fill { height:100%; border-radius:var(--radius-full); transition:width .9s ease; }
+
+    /* ── Table ────────────────────────────────────── */
+    .tbl-wrap { background:white; border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); overflow:hidden; }
+    .tbl-toolbar { display:flex; align-items:center; gap:.65rem; padding:1rem 1.25rem; border-bottom:1px solid var(--gray-100); flex-wrap:wrap; }
+    .adm-input { background:var(--gray-50); border:1.5px solid var(--gray-200); border-radius:var(--radius-md); padding:.5rem .85rem; font-size:.83rem; color:var(--gray-800); outline:none; font-family:var(--font-body); transition:border-color .2s; }
+    .adm-input::placeholder { color:var(--gray-400); }
+    .adm-input:focus { border-color:var(--green-400); background:white; }
+    .adm-select { background:var(--gray-50); border:1.5px solid var(--gray-200); border-radius:var(--radius-md); padding:.5rem .7rem; font-size:.82rem; color:var(--gray-600); outline:none; font-family:var(--font-body); cursor:pointer; transition:border-color .2s; }
+    .adm-select:focus { border-color:var(--green-400); }
+    table { width:100%; border-collapse:collapse; font-size:.85rem; }
+    thead tr { background:var(--gray-50); border-bottom:1px solid var(--gray-100); }
+    th { padding:.65rem 1rem; text-align:left; font-size:.68rem; font-weight:700; color:var(--gray-400); text-transform:uppercase; letter-spacing:.07em; white-space:nowrap; }
+    td { padding:.85rem 1rem; border-bottom:1px solid var(--gray-50); color:var(--gray-600); vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:var(--gray-50); }
+    .td-b { font-weight:600; color:var(--gray-800); }
+    .td-m { font-size:.75rem; color:var(--gray-400); margin-top:2px; }
+
+    /* ── Badges ───────────────────────────────────── */
+    .badge { display:inline-flex; align-items:center; padding:.2rem .65rem; border-radius:var(--radius-full); font-size:.72rem; font-weight:700; white-space:nowrap; }
+    .b-submitted { background:#fef9c3; color:#92400e; }
+    .b-in_progress { background:#dbeafe; color:#1e40af; }
+    .b-resolved { background:var(--green-100); color:var(--green-700); }
+    .b-high { background:#fee2e2; color:#991b1b; }
+    .b-normal { background:var(--gray-100); color:var(--gray-600); }
+    .b-low { background:#f0fdf4; color:var(--green-600); }
+    .b-citizen { background:var(--gray-100); color:var(--gray-600); }
+    .b-authority { background:#dbeafe; color:#1e40af; }
+    .b-admin { background:#ede9fe; color:#5b21b6; }
+    .b-active { background:var(--green-100); color:var(--green-700); }
+    .b-inactive { background:#fee2e2; color:#991b1b; }
+    .b-new { background:#fee2e2; color:#991b1b; }
+    .b-read { background:var(--gray-100); color:var(--gray-500); }
+    .b-msg-resolved { background:var(--green-100); color:var(--green-700); }
+    .pri-high { color:#dc2626; font-weight:700; font-size:.78rem; }
+    .pri-normal { color:var(--gray-500); font-size:.78rem; }
+    .pri-low { color:var(--green-500); font-size:.78rem; }
+
+    /* ── Action buttons ───────────────────────────── */
+    .acts { display:flex; align-items:center; gap:.3rem; flex-wrap:wrap; }
+    .bx { padding:.3rem .65rem; font-size:.73rem; border-radius:var(--radius-sm); font-weight:600; cursor:pointer; border:none; transition:all .15s; font-family:var(--font-body); white-space:nowrap; }
+    .bx-g { background:var(--green-100); color:var(--green-700); } .bx-g:hover { background:var(--green-200); }
+    .bx-b { background:#dbeafe; color:#1e40af; }                   .bx-b:hover { background:#bfdbfe; }
+    .bx-y { background:#fef9c3; color:#92400e; }                   .bx-y:hover { background:#fef08a; }
+    .bx-r { background:#fee2e2; color:#991b1b; }                   .bx-r:hover { background:#fecaca; }
+    .bx-p { background:#ede9fe; color:#5b21b6; }                   .bx-p:hover { background:#ddd6fe; }
+    .bx-o { background:#ffedd5; color:#9a3412; }                   .bx-o:hover { background:#fed7aa; }
+
+    /* ── Pagination ───────────────────────────────── */
+    .pagination { display:flex; align-items:center; justify-content:space-between; padding:.85rem 1.25rem; border-top:1px solid var(--gray-100); font-size:.8rem; color:var(--gray-400); }
+    .pg-btns { display:flex; gap:.3rem; }
+    .pg-btn { padding:.3rem .65rem; border-radius:var(--radius-sm); border:1.5px solid var(--gray-200); background:white; color:var(--gray-600); font-size:.78rem; cursor:pointer; transition:all .15s; font-family:var(--font-body); }
+    .pg-btn:hover:not(:disabled) { border-color:var(--green-400); color:var(--green-700); background:var(--green-50); }
+    .pg-btn.active { background:var(--green-600); color:white; border-color:var(--green-600); font-weight:700; }
+    .pg-btn:disabled { opacity:.35; cursor:not-allowed; }
+
+    /* ── Supervisor picker (assign modal) ───────── */
+    .sv-pick-card { display:flex; align-items:center; gap:.75rem; padding:.7rem .85rem; border-radius:var(--radius-md); border:1.5px solid var(--gray-200); cursor:pointer; transition:all .15s; background:white; }
+    .sv-pick-card:hover { border-color:var(--green-300); background:var(--green-50); }
+    .sv-pick-av { width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,#3b82f6,#2563eb); display:flex; align-items:center; justify-content:center; font-size:.9rem; font-weight:700; color:white; flex-shrink:0; }
+    .zone-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.25rem; }
+    .zone-card { background:white; border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:1.25rem; border-left:4px solid var(--green-500); transition:all .25s; cursor:pointer; }
+    .zone-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); border-left-color:var(--green-600); }
+    .zone-card-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:.85rem; }
+    .zone-name { font-size:1rem; font-weight:700; color:var(--gray-900); }
+    .zone-desc { font-size:.78rem; color:var(--gray-500); margin-top:.2rem; }
+    .zone-sv { display:flex; align-items:center; gap:.5rem; margin-bottom:.75rem; padding:.55rem .7rem; background:var(--gray-50); border-radius:var(--radius-sm); }
+    .zone-sv-av { width:30px; height:30px; background:linear-gradient(135deg,#3b82f6,#2563eb); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.78rem; font-weight:700; color:white; flex-shrink:0; }
+    .zone-sv-name { font-size:.82rem; font-weight:600; color:var(--gray-800); }
+    .zone-sv-phone { font-size:.72rem; color:var(--gray-400); }
+    .zone-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:.5rem; margin-bottom:.75rem; }
+    .zone-stat { text-align:center; padding:.45rem .3rem; background:var(--gray-50); border-radius:var(--radius-sm); }
+    .zone-stat-num { font-size:1.1rem; font-weight:700; color:var(--gray-900); }
+    .zone-stat-label { font-size:.65rem; color:var(--gray-400); text-transform:uppercase; letter-spacing:.04em; }
+    .zone-areas { display:flex; flex-wrap:wrap; gap:.3rem; }
+    .area-tag { background:var(--green-50); color:var(--green-700); font-size:.7rem; font-weight:600; padding:.15rem .5rem; border-radius:var(--radius-full); border:1px solid var(--green-200); }
+    .zone-card-footer { display:flex; gap:.4rem; margin-top:.85rem; padding-top:.75rem; border-top:1px solid var(--gray-100); }
+
+    /* ── Zone detail modal content ────────────────── */
+    .zone-complaint-item { padding:.6rem 0; border-bottom:1px solid var(--gray-100); }
+    .zone-complaint-item:last-child { border-bottom:none; }
+    .zcl-desc { font-size:.85rem; font-weight:600; color:var(--gray-800); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+    .zcl-meta { font-size:.75rem; color:var(--gray-400); margin-top:2px; }
+    .zcl-row { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; margin-top:.35rem; }
+
+    /* ── Modal ────────────────────────────────────── */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:2000; display:flex; align-items:center; justify-content:center; padding:1rem; backdrop-filter:blur(4px); opacity:0; pointer-events:none; transition:opacity .2s; }
+    .modal-overlay.open { opacity:1; pointer-events:all; }
+    .modal { background:white; border-radius:var(--radius-xl); box-shadow:0 24px 80px rgba(0,0,0,.15); width:100%; max-width:520px; max-height:90vh; overflow-y:auto; padding:2rem; transform:scale(.95); transition:transform .2s; }
+    .modal-lg { max-width:680px; }
+    .modal-overlay.open .modal { transform:scale(1); }
+    .modal-title { font-family:var(--font-display); font-size:1.15rem; font-weight:600; color:var(--gray-900); margin-bottom:1.25rem; padding-bottom:.75rem; border-bottom:1px solid var(--gray-100); }
+    .m-field { margin-bottom:1rem; }
+    .m-label { font-size:.78rem; font-weight:600; color:var(--gray-500); margin-bottom:.35rem; display:block; text-transform:uppercase; letter-spacing:.05em; }
+    .m-value { font-size:.9rem; color:var(--gray-700); }
+    .m-textarea { width:100%; background:var(--gray-50); border:1.5px solid var(--gray-200); border-radius:var(--radius-md); padding:.7rem; color:var(--gray-800); font-size:.88rem; resize:vertical; min-height:85px; outline:none; font-family:var(--font-body); transition:border-color .2s; }
+    .m-textarea:focus { border-color:var(--green-400); background:white; }
+    .m-select { width:100%; background:var(--gray-50); border:1.5px solid var(--gray-200); border-radius:var(--radius-md); padding:.6rem .8rem; color:var(--gray-800); font-size:.88rem; outline:none; font-family:var(--font-body); cursor:pointer; transition:border-color .2s; }
+    .m-select:focus { border-color:var(--green-400); }
+    .m-input { width:100%; background:var(--gray-50); border:1.5px solid var(--gray-200); border-radius:var(--radius-md); padding:.6rem .8rem; color:var(--gray-800); font-size:.88rem; outline:none; font-family:var(--font-body); transition:border-color .2s; }
+    .m-input:focus { border-color:var(--green-400); background:white; }
+    .modal-acts { display:flex; gap:.75rem; justify-content:flex-end; margin-top:1.25rem; padding-top:1rem; border-top:1px solid var(--gray-100); }
+    .btn-cancel { padding:.5rem 1.1rem; border-radius:var(--radius-full); border:1.5px solid var(--gray-200); background:white; color:var(--gray-600); font-size:.875rem; cursor:pointer; font-family:var(--font-body); transition:all .15s; }
+    .btn-cancel:hover { color:var(--gray-800); }
+    .btn-confirm { padding:.5rem 1.25rem; border-radius:var(--radius-full); border:none; background:var(--green-600); color:white; font-size:.875rem; font-weight:700; cursor:pointer; font-family:var(--font-body); box-shadow:0 4px 14px rgba(45,122,74,.3); transition:all .15s; }
+    .btn-confirm:hover { background:var(--green-700); }
+    .btn-danger { background:var(--red); box-shadow:none; } .btn-danger:hover { background:#c53030; }
+
+    /* ── SVG Icon helpers ─────────────────────────── */
+    .nav-ico { width:20px; height:20px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+    .nav-ico svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; transition:stroke .18s; }
+
+    /* ── Profile redesign ────────────────────────── */
+    .profile-grid { display:grid; grid-template-columns:300px 1fr; gap:1.5rem; align-items:start; }
+    .profile-id-card { background:white; border-radius:var(--radius-xl); box-shadow:var(--shadow-sm); overflow:hidden; }
+    .profile-id-banner { height:90px; background:linear-gradient(135deg,var(--green-600),var(--green-400)); }
+    .profile-id-body { padding:0 1.5rem 1.5rem; text-align:center; }
+    .profile-av-wrap { margin-top:-36px; margin-bottom:.75rem; }
+    .profile-av-big { width:72px; height:72px; background:linear-gradient(135deg,var(--green-400),var(--green-600)); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.8rem; font-weight:700; color:white; margin:0 auto; border:4px solid white; box-shadow:var(--shadow-sm); }
+    .profile-name { font-family:var(--font-display); font-size:1.2rem; font-weight:600; color:var(--gray-900); }
+    .profile-role-row { margin:.3rem 0 1rem; }
+    .profile-stat-row { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; margin-top:1rem; }
+    .profile-stat { background:var(--gray-50); border-radius:var(--radius-md); padding:.65rem; text-align:center; }
+    .profile-stat-num { font-family:var(--font-display); font-size:1.4rem; font-weight:600; color:var(--gray-900); }
+    .profile-stat-label { font-size:.68rem; color:var(--gray-400); text-transform:uppercase; letter-spacing:.05em; margin-top:1px; }
+    .profile-right { display:flex; flex-direction:column; gap:1.25rem; }
+    .profile-section-card { background:white; border-radius:var(--radius-xl); box-shadow:var(--shadow-sm); padding:1.5rem; }
+    .profile-section-title { font-size:.82rem; font-weight:700; color:var(--gray-700); text-transform:uppercase; letter-spacing:.06em; margin-bottom:1rem; padding-bottom:.6rem; border-bottom:1px solid var(--gray-100); display:flex; align-items:center; gap:.4rem; }
+
+    /* ── Resolved History page ───────────────────── */
+    .resolved-filters { display:flex; align-items:center; gap:.65rem; flex-wrap:wrap; margin-bottom:1.25rem; }
+    .resolved-card { background:white; border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:1.25rem; margin-bottom:1rem; border-left:4px solid var(--green-400); transition:all .2s; }
+    .resolved-card:hover { box-shadow:var(--shadow-md); transform:translateY(-1px); }
+    .rc-top { display:flex; align-items:flex-start; justify-content:space-between; gap:.75rem; margin-bottom:.85rem; flex-wrap:wrap; }
+    .rc-title { font-size:.95rem; font-weight:700; color:var(--gray-900); }
+    .rc-meta { font-size:.75rem; color:var(--gray-400); margin-top:.2rem; display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
+    .rc-badges { display:flex; align-items:center; gap:.4rem; flex-wrap:wrap; }
+    .rc-timeline { border-left:2px solid var(--gray-100); padding-left:1rem; margin:0 0 .75rem .25rem; }
+    .rc-tl-item { position:relative; padding:.45rem 0; }
+    .rc-tl-item::before { content:''; position:absolute; left:-1.15rem; top:.6rem; width:8px; height:8px; border-radius:50%; background:var(--gray-300); }
+    .rc-tl-item.tl-resolved::before { background:var(--green-500); }
+    .rc-tl-item.tl-in_progress::before { background:#3b82f6; }
+    .rc-tl-item.tl-submitted::before { background:#f59e0b; }
+    .rc-tl-label { font-size:.8rem; font-weight:600; color:var(--gray-700); }
+    .rc-tl-msg { font-size:.75rem; color:var(--gray-500); margin-top:1px; }
+    .rc-tl-time { font-size:.7rem; color:var(--gray-400); margin-top:1px; }
+    .rc-reporter { background:var(--gray-50); border-radius:var(--radius-sm); padding:.55rem .75rem; font-size:.8rem; color:var(--gray-600); display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
+    .rc-imgs { display:flex; gap:.4rem; margin-top:.65rem; }
+    .rc-img { width:60px; height:60px; object-fit:cover; border-radius:var(--radius-sm); border:1px solid var(--gray-100); cursor:pointer; transition:opacity .15s; }
+    .rc-img:hover { opacity:.85; }
+    .rc-expand-btn { background:none; border:none; font-size:.78rem; color:var(--green-600); font-weight:600; cursor:pointer; font-family:var(--font-body); padding:.2rem 0; transition:color .15s; }
+    .rc-expand-btn:hover { color:var(--green-700); }
+
+    /* ── Detail section ───────────────────────────── */
+    .detail-sec { background:var(--gray-50); border-radius:var(--radius-md); padding:.9rem; margin-bottom:.75rem; }
+    .detail-sec-title { font-size:.72rem; font-weight:700; color:var(--gray-400); text-transform:uppercase; letter-spacing:.07em; margin-bottom:.6rem; }
+    .detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
+    .di label { font-size:.7rem; color:var(--gray-400); display:block; margin-bottom:2px; text-transform:uppercase; letter-spacing:.04em; }
+    .di span { font-size:.85rem; color:var(--gray-700); font-weight:500; }
+    .history-item { display:flex; align-items:flex-start; gap:.6rem; padding:.55rem 0; border-bottom:1px solid var(--gray-100); }
+    .history-item:last-child { border-bottom:none; }
+    .h-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+    .h-text { font-size:.83rem; color:var(--gray-600); }
+    .h-time { font-size:.72rem; color:var(--gray-400); margin-top:2px; }
+
+    /* ── Misc ─────────────────────────────────────── */
+    .thumb { width:40px; height:40px; border-radius:var(--radius-sm); object-fit:cover; border:1px solid var(--gray-100); }
+    .thumb-ph { width:40px; height:40px; border-radius:var(--radius-sm); background:var(--green-50); display:flex; align-items:center; justify-content:center; font-size:1.1rem; border:1px solid var(--green-100); }
+    .empty-st { text-align:center; padding:2.5rem 1rem; color:var(--gray-400); }
+    .empty-st-icon { font-size:2.2rem; margin-bottom:.5rem; }
+    .skeleton { background:linear-gradient(90deg,var(--gray-100) 25%,var(--gray-50) 50%,var(--gray-100) 75%); background-size:200% 100%; animation:shimmer 1.3s infinite; border-radius:var(--radius-sm); }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .sms-note { background:var(--green-50); border:1.5px solid var(--green-200); border-radius:var(--radius-md); padding:.65rem .85rem; font-size:.78rem; color:var(--green-700); margin-bottom:.5rem; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
+
+    /* ── Responsive ───────────────────────────────── */
+    @media(max-width:1100px) { .stats-grid{grid-template-columns:repeat(2,1fr)} .charts-row{grid-template-columns:1fr} }
+    @media(max-width:768px) {
+      html, body { overflow:auto; height:auto; }
+      .admin-layout { grid-template-columns:1fr; height:auto; margin-top:var(--nav-height); }
+      .admin-sidebar { display:none; }
+      .admin-main { padding:1rem; height:auto; overflow-y:visible; }
+      .collapse-btn { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar scrolled">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">♻</div> CleanCity
+    </a>
+    <div style="display:flex;align-items:center;gap:.75rem">
+      <span style="font-size:.75rem;background:var(--green-100);color:var(--green-700);padding:.2rem .75rem;border-radius:var(--radius-full);font-weight:700">🛡️ Admin Panel</span>
+      <button onclick="adminLogout()" class="btn btn-ghost btn-sm">🚪 Logout</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Collapse toggle -->
+<button class="collapse-btn" id="collapseBtn" onclick="toggleSidebar()" title="Collapse sidebar">◀</button>
+
+<div class="admin-layout" id="adminLayout">
+
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-icon">🛡️</div>
+      <div class="sb-brand-text">
+        <div class="sb-brand-title">Admin Panel</div>
+        <div class="sb-brand-sub">CleanCity Management</div>
+      </div>
+    </div>
+
+    <div class="sb-sec">Overview</div>
+    <ul class="admin-nav">
+      <li><a onclick="showSection('overview')" class="active" id="nav-overview">
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+        <span class="nav-label">Dashboard</span>
+      </a></li>
+    </ul>
+
+    <div class="sb-sec">Complaints</div>
+    <ul class="admin-nav">
+      <li><a onclick="showSection('complaints')" id="nav-complaints">
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg></span>
+        <span class="nav-label">All Reports</span>
+        <span class="nav-badge" id="badge-complaints" style="display:none">0</span>
+      </a></li>
+      <li><a onclick="goUnassigned()" id="nav-unassigned">
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg></span>
+        <span class="nav-label">Unassigned</span>
+        <span class="nav-badge" id="badge-unassigned" style="display:none">0</span>
+      </a></li>
+      <li><a onclick="goPriority()" id="nav-priority">
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>
+        <span class="nav-label">Priority Queue</span>
+      </a></li>
+      <li><a onclick="showSection('resolved')" id="nav-resolved">
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
+        <span class="nav-label">Resolved History</span>
+        <span class="nav-badge" id="badge-resolved" style="display:none;background:var(--green-500)">0</span>
+      </a></li>
+    </ul>
+
+    <div class="sb-sec">Management</div>
+    <ul class="admin-nav">
+      <li><a onclick="showSection('zones')" id="nav-zones">
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span>
+        <span class="nav-label">Authority Zones</span>
+      </a></li>
+      <li><a onclick="showSection('users')" id="nav-users">
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></span>
+        <span class="nav-label">Users</span>
+      </a></li>
+      <li><a onclick="showSection('contacts')" id="nav-contacts">
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+        <span class="nav-label">Messages</span>
+        <span class="nav-badge" id="badge-contacts" style="display:none">0</span>
+      </a></li>
+    </ul>
+
+    <div class="sb-footer">
+      <div class="admin-pill" onclick="showSection('profile')">
+        <div class="admin-av" id="adminAvatar">A</div>
+        <div class="admin-pill-text">
+          <div class="admin-pill-name" id="adminName">Loading…</div>
+          <div class="admin-pill-role" id="adminRole">admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+
+    <!-- ══ OVERVIEW ══ -->
+    <section class="admin-section active" id="section-overview">
+      <div class="sec-hdr">
+        <div><div class="sec-title">Dashboard</div><div class="sec-sub">Live platform overview</div></div>
+        <button class="refresh-btn" onclick="loadOverview()">↻ Refresh</button>
+      </div>
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-box"><div class="skeleton" style="height:80px"></div></div>
+        <div class="stat-box"><div class="skeleton" style="height:80px"></div></div>
+        <div class="stat-box"><div class="skeleton" style="height:80px"></div></div>
+        <div class="stat-box"><div class="skeleton" style="height:80px"></div></div>
+      </div>
+      <div class="charts-row">
+        <div class="chart-card"><div class="chart-title">📊 Complaints by Category</div><div id="catChart"><div class="skeleton" style="height:100px"></div></div></div>
+        <div class="chart-card"><div class="chart-title">📌 Status Breakdown</div><div id="statusChart"><div class="skeleton" style="height:100px"></div></div></div>
+      </div>
+      <div class="tbl-wrap">
+        <div class="tbl-toolbar" style="justify-content:space-between">
+          <span style="font-size:.88rem;font-weight:700;color:var(--gray-700)">🔴 Priority Queue — Top Unresolved</span>
+          <a onclick="goPriority()" style="font-size:.82rem;color:var(--green-600);cursor:pointer;font-weight:600">View all →</a>
+        </div>
+        <table>
+          <thead><tr><th>Photo</th><th>Description</th><th>Priority</th><th>Votes</th><th>Status</th><th>Assigned</th><th>Action</th></tr></thead>
+          <tbody id="priorityBody"><tr><td colspan="7"><div class="skeleton" style="height:36px;margin:.5rem 1rem"></div></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══ COMPLAINTS ══ -->
+    <section class="admin-section" id="section-complaints">
+      <div class="sec-hdr">
+        <div><div class="sec-title">All Reports</div><div class="sec-sub">Manage, assign, and update complaint status</div></div>
+        <button class="refresh-btn" onclick="loadComplaints()">↻ Refresh</button>
+      </div>
+      <div class="tbl-wrap">
+        <div class="tbl-toolbar">
+          <input class="adm-input" id="cSearch" placeholder="🔍 Search…" oninput="dbc(loadComplaints,400)()" style="flex:1;min-width:130px">
+          <input class="adm-input" id="cArea" placeholder="📍 Filter area…" oninput="dbc(loadComplaints,400)()" style="min-width:120px">
+          <select class="adm-select" id="cStatus" onchange="loadComplaints()">
+            <option value="">All Status</option>
+            <option value="submitted">Submitted</option>
+            <option value="in_progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+          </select>
+          <select class="adm-select" id="cCat" onchange="loadComplaints()">
+            <option value="">All Categories</option>
+            <option value="garbage">Garbage</option>
+            <option value="drainage">Drainage</option>
+            <option value="illegal_dumping">Illegal Dumping</option>
+            <option value="broken_infrastructure">Infrastructure</option>
+            <option value="public_hygiene">Public Hygiene</option>
+            <option value="other">Other</option>
+          </select>
+          <select class="adm-select" id="cAssigned" onchange="loadComplaints()">
+            <option value="">All</option>
+            <option value="no">Unassigned</option>
+            <option value="yes">Assigned</option>
+          </select>
+          <select class="adm-select" id="cSort" onchange="loadComplaints()">
+            <option value="priority">Priority Order</option>
+            <option value="votes">Most Voted</option>
+            <option value="date">Latest First</option>
+          </select>
+        </div>
+        <table>
+          <thead><tr><th>Photo</th><th>Report</th><th>Reporter</th><th>Priority</th><th>Votes</th><th>Status</th><th>Assigned To</th><th>Date</th><th>Actions</th></tr></thead>
+          <tbody id="complaintsBody"><tr><td colspan="9"><div class="skeleton" style="height:40px;margin:.5rem 1rem"></div></td></tr></tbody>
+        </table>
+        <div class="pagination" id="cPag"><span id="cPagInfo"></span><div class="pg-btns" id="cPagBtns"></div></div>
+      </div>
+    </section>
+
+    <!-- ══ AUTHORITY ZONES ══ -->
+    <section class="admin-section" id="section-zones">
+      <div class="sec-hdr">
+        <div><div class="sec-title">Authority Zones</div><div class="sec-sub">Create and manage authority areas with supervisors</div></div>
+        <div class="hdr-actions">
+          <button class="refresh-btn" onclick="loadZones()">↻ Refresh</button>
+          <button class="add-btn" onclick="openZoneModal()">＋ New Zone</button>
+        </div>
+      </div>
+      <div class="zone-grid" id="zoneGrid">
+        <div class="skeleton" style="height:200px;border-radius:var(--radius-lg)"></div>
+        <div class="skeleton" style="height:200px;border-radius:var(--radius-lg)"></div>
+      </div>
+    </section>
+
+    <!-- ══ USERS ══ -->
+    <section class="admin-section" id="section-users">
+      <div class="sec-hdr">
+        <div><div class="sec-title">User Management</div><div class="sec-sub">View, disable, and manage authority accounts</div></div>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <button class="btn-add" onclick="openCreateAuthorityModal()">＋ Create Authority</button>
+          <button class="refresh-btn" onclick="loadUsers()">↻ Refresh</button>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <div class="tbl-toolbar">
+          <input class="adm-input" id="uSearch" placeholder="🔍 Search name, phone, email…" oninput="dbc(loadUsers,400)()" style="flex:1;min-width:140px">
+          <select class="adm-select" id="uRole" onchange="loadUsers()">
+            <option value="">All Roles</option>
+            <option value="citizen">Citizen</option>
+            <option value="authority">Authority</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <table>
+          <thead><tr><th>User</th><th>Phone</th><th>Role / Area</th><th>Status</th><th>Score</th><th>Joined</th><th>Actions</th></tr></thead>
+          <tbody id="usersBody"><tr><td colspan="7"><div class="skeleton" style="height:40px;margin:.5rem 1rem"></div></td></tr></tbody>
+        </table>
+        <div class="pagination" id="uPag"><span id="uPagInfo"></span><div class="pg-btns" id="uPagBtns"></div></div>
+      </div>
+    </section>
+
+    <!-- ══ CONTACTS ══ -->
+    <section class="admin-section" id="section-contacts">
+      <div class="sec-hdr">
+        <div><div class="sec-title">Contact Messages</div><div class="sec-sub">Messages submitted via the contact form</div></div>
+        <button class="refresh-btn" onclick="loadContacts()">↻ Refresh</button>
+      </div>
+      <div class="tbl-wrap">
+        <div class="tbl-toolbar">
+          <select class="adm-select" id="msgStatus" onchange="loadContacts()">
+            <option value="">All</option><option value="new">New</option><option value="read">Read</option><option value="resolved">Resolved</option>
+          </select>
+        </div>
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>Subject</th><th>Preview</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+          <tbody id="contactsBody"><tr><td colspan="7"><div class="skeleton" style="height:40px;margin:.5rem 1rem"></div></td></tr></tbody>
+        </table>
+        <div class="pagination" id="msgPag"><span id="msgPagInfo"></span><div class="pg-btns" id="msgPagBtns"></div></div>
+      </div>
+    </section>
+
+    <!-- ══ PROFILE ══ -->
+    <section class="admin-section" id="section-profile">
+      <div class="sec-hdr">
+        <div><div class="sec-title">My Profile</div><div class="sec-sub">Update your admin account details</div></div>
+      </div>
+      <div class="profile-grid">
+        <!-- LEFT: ID card -->
+        <div class="profile-id-card">
+          <div class="profile-id-banner"></div>
+          <div class="profile-id-body">
+            <div class="profile-av-wrap">
+              <div class="profile-av-big" id="profileAvBig">A</div>
+            </div>
+            <div class="profile-name" id="profileName">Loading…</div>
+            <div class="profile-role-row"><span class="badge b-admin" id="profileRole">admin</span></div>
+            <div style="font-size:.8rem;color:var(--gray-500)" id="profileEmail">—</div>
+            <div style="font-size:.8rem;color:var(--gray-400);margin-top:.2rem" id="profilePhone">—</div>
+            <div style="font-size:.78rem;color:var(--green-600);font-weight:600;margin-top:.3rem" id="profileArea"></div>
+            <div class="profile-stat-row" id="profileStats">
+              <div class="profile-stat"><div class="profile-stat-num" id="pStatResolved">—</div><div class="profile-stat-label">Resolved</div></div>
+              <div class="profile-stat"><div class="profile-stat-num" id="pStatActive">—</div><div class="profile-stat-label">Active</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Edit forms -->
+        <div class="profile-right">
+          <div class="profile-section-card">
+            <div class="profile-section-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Account Info
+            </div>
+            <div class="form-row m-field">
+              <div><label class="m-label">Full Name</label><input class="m-input" id="pName" placeholder="Your name"></div>
+              <div><label class="m-label">Email</label><input class="m-input" type="email" id="pEmail" placeholder="admin@cleancity.gov"></div>
+            </div>
+            <div class="form-row m-field">
+              <div><label class="m-label">Phone</label><input class="m-input" id="pPhone" placeholder="+91 9876543210"></div>
+              <div><label class="m-label">Area / Zone</label><input class="m-input" id="pArea" placeholder="e.g. North Zone"></div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="saveProfileInfo()">Save Info</button>
+          </div>
+
+          <div class="profile-section-card">
+            <div class="profile-section-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              Change Password
+              <span style="font-size:.72rem;font-weight:400;color:var(--gray-400);margin-left:.3rem">leave blank to keep current</span>
+            </div>
+            <div class="form-row m-field">
+              <div><label class="m-label">Current Password</label><input class="m-input" type="password" id="pCurPass" placeholder="Current password"></div>
+              <div><label class="m-label">New Password</label><input class="m-input" type="password" id="pNewPass" placeholder="Min 6 chars"></div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="savePassword()">Update Password</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ RESOLVED HISTORY ══ -->
+    <section class="admin-section" id="section-resolved">
+      <div class="sec-hdr">
+        <div>
+          <div class="sec-title">Resolved History</div>
+          <div class="sec-sub">All complaints that have been resolved — full journey from submission to resolution</div>
+        </div>
+        <button class="refresh-btn" onclick="loadResolved()">↻ Refresh</button>
+      </div>
+      <div class="resolved-filters">
+        <input class="adm-input" id="rSearch" placeholder="🔍 Search resolved…" oninput="dbc(loadResolved,400)()" style="flex:1;min-width:140px">
+        <input class="adm-input" id="rRegion" placeholder="📍 Region / locality…" oninput="dbc(loadResolved,400)()" style="min-width:130px">
+        <select class="adm-select" id="rCat" onchange="loadResolved()">
+          <option value="">All Categories</option>
+          <option value="garbage">Garbage</option>
+          <option value="drainage">Drainage</option>
+          <option value="illegal_dumping">Illegal Dumping</option>
+          <option value="broken_infrastructure">Infrastructure</option>
+          <option value="public_hygiene">Public Hygiene</option>
+          <option value="other">Other</option>
+        </select>
+        <select class="adm-select" id="rSort" onchange="loadResolved()">
+          <option value="date">Latest Resolved</option>
+          <option value="duration">Quickest Resolved</option>
+          <option value="votes">Most Voted</option>
+        </select>
+      </div>
+      <!-- Summary strip -->
+      <div id="resolvedSummary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem"></div>
+      <!-- Cards -->
+      <div id="resolvedList"><div class="skeleton" style="height:150px;border-radius:var(--radius-lg);margin-bottom:1rem"></div></div>
+      <div class="pagination" id="rPag" style="background:white;border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:.85rem 1.25rem">
+        <span id="rPagInfo"></span><div class="pg-btns" id="rPagBtns"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ══ MODALS ══ -->
+
+<!-- Status update -->
+<div class="modal-overlay" id="statusModal">
+  <div class="modal">
+    <div class="modal-title">✏️ Update Complaint Status</div>
+    <div class="m-field"><label class="m-label">New Status</label>
+      <select class="m-select" id="mStatus">
+        <option value="submitted">Submitted</option>
+        <option value="in_progress">In Progress</option>
+        <option value="resolved">Resolved</option>
+      </select>
+    </div>
+    <div class="m-field"><label class="m-label">Message to User</label>
+      <textarea class="m-textarea" id="mMessage" placeholder="Describe the action being taken…"></textarea>
+    </div>
+    <div class="sms-note">📱 User receives SMS + in-app notification with this update.</div>
+    <div class="modal-acts">
+      <button class="btn-cancel" onclick="closeModal('statusModal')">Cancel</button>
+      <button class="btn-confirm" onclick="confirmStatus()">Update & Notify</button>
+    </div>
+  </div>
+</div>
+
+<!-- Assign -->
+<div class="modal-overlay" id="assignModal">
+  <div class="modal">
+    <div class="modal-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:.4rem"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Assign to Authority Supervisor
+    </div>
+    <div class="m-field">
+      <label class="m-label">Select Authority Zone Supervisor</label>
+      <div id="mAssignAreaTitle" style="font-size:.78rem;color:var(--green-700);background:var(--green-50);border-radius:6px;padding:.35rem .6rem;margin-bottom:.4rem;font-weight:600"></div>
+      <div id="mAuthorityList" style="display:flex;flex-direction:column;gap:.5rem;max-height:220px;overflow-y:auto;padding:.25rem 0"></div>
+    </div>
+    <div class="m-field"><label class="m-label">Assignment Note / Instructions</label>
+      <textarea class="m-textarea" id="mAssignNote" placeholder="Describe the task, urgency, or specific instructions…"></textarea>
+    </div>
+    <div class="sms-note">📱 Authority supervisor and reporter both receive SMS + in-app notification.</div>
+    <div class="modal-acts">
+      <button class="btn-cancel" onclick="closeModal('assignModal')">Cancel</button>
+      <button class="btn-confirm" onclick="confirmAssign()">Assign Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- Complaint detail -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal modal-lg">
+    <div class="modal-title">📋 Complaint Details</div>
+    <div id="detailContent"><div class="skeleton" style="height:200px"></div></div>
+    <div class="modal-acts"><button class="btn-cancel" onclick="closeModal('detailModal')">Close</button></div>
+  </div>
+</div>
+
+<!-- Zone create/edit -->
+<div class="modal-overlay" id="zoneModal">
+  <div class="modal">
+    <div class="modal-title" id="zoneModalTitle">Create Authority Zone</div>
+    <div class="m-field"><label class="m-label">Zone Name *</label><input class="m-input" id="zName" placeholder="e.g. North Zone, Ward 5"></div>
+    <div class="m-field"><label class="m-label">Description</label><input class="m-input" id="zDesc" placeholder="Brief description of this zone"></div>
+    <div class="m-field"><label class="m-label">Areas Covered <span style="font-weight:400;color:var(--gray-400)">(comma-separated)</span></label>
+      <input class="m-input" id="zAreas" placeholder="e.g. Chembur East, Govandi, Sion, Kurla">
+    </div>
+    <div style="background:var(--green-50);border:1.5px solid var(--green-200);border-radius:var(--radius-md);padding:.65rem .85rem;font-size:.78rem;color:var(--green-700);margin-bottom:.85rem">
+      👮 Authority Supervisor Details
+    </div>
+    <div class="form-row m-field">
+      <div><label class="m-label">Supervisor Name *</label><input class="m-input" id="zSvName" placeholder="Full name"></div>
+      <div><label class="m-label">Supervisor Phone *</label><input class="m-input" id="zSvPhone" placeholder="e.g. 9876543210"></div>
+    </div>
+    <div class="m-field">
+      <label class="m-label">Link to existing user account <span style="font-weight:400;color:var(--gray-400)">(optional)</span></label>
+      <select class="m-select" id="zSupervisor">
+        <option value="">— Select existing user (optional) —</option>
+      </select>
+    </div>
+    <div class="m-field"><label class="m-label">Number of Staff</label>
+      <input class="m-input" type="number" id="zStaff" placeholder="e.g. 12" min="0">
+    </div>
+    <div class="modal-acts">
+      <button class="btn-cancel" onclick="closeModal('zoneModal')">Cancel</button>
+      <button class="btn-confirm" id="zoneSubmitBtn" onclick="submitZone()">Create Zone</button>
+    </div>
+  </div>
+</div>
+
+<!-- Zone detail -->
+<div class="modal-overlay" id="zoneDetailModal">
+  <div class="modal modal-lg">
+    <div class="modal-title" id="zdTitle">🗺️ Zone Details</div>
+    <div id="zdContent"><div class="skeleton" style="height:200px"></div></div>
+    <div class="modal-acts"><button class="btn-cancel" onclick="closeModal('zoneDetailModal')">Close</button></div>
+  </div>
+</div>
+
+<!-- Delete confirm -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <div class="modal-title">🗑️ Confirm Deletion</div>
+    <div class="m-field"><div class="m-value" id="deleteText" style="color:var(--red)"></div></div>
+    <div class="modal-acts">
+      <button class="btn-cancel" onclick="closeModal('deleteModal')">Cancel</button>
+      <button class="btn-confirm btn-danger" onclick="confirmDelete()">Delete Permanently</button>
+    </div>
+  </div>
+</div>
+
+<!-- Message detail -->
+<div class="modal-overlay" id="msgModal">
+  <div class="modal">
+    <div class="modal-title">✉️ Contact Message</div>
+    <div class="m-field"><label class="m-label">From</label><div class="m-value" id="mMsgFrom"></div></div>
+    <div class="m-field"><label class="m-label">Email</label><div class="m-value" id="mMsgEmail"></div></div>
+    <div class="m-field"><label class="m-label">Subject</label><div class="m-value" id="mMsgSubject"></div></div>
+    <div class="m-field"><label class="m-label">Message</label>
+      <div id="mMsgBody" style="background:var(--gray-50);padding:.75rem;border-radius:var(--radius-md);font-size:.85rem;color:var(--gray-600);white-space:pre-wrap;max-height:180px;overflow-y:auto;border:1px solid var(--gray-100)"></div>
+    </div>
+    <div class="m-field"><label class="m-label">Status</label>
+      <select class="m-select" id="mMsgStatus"><option value="new">New</option><option value="read">Read</option><option value="resolved">Resolved</option></select>
+    </div>
+    <div class="modal-acts">
+      <button class="btn-cancel" onclick="closeModal('msgModal')">Close</button>
+      <button class="btn-confirm" onclick="confirmMsgStatus()">Save Status</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CREATE AUTHORITY MODAL ══ -->
+<div class="modal-overlay" id="createAuthorityModal" onclick="if(event.target===this)closeModal('createAuthorityModal')">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-title">👮 Create Authority Account</div>
+    <p style="font-size:.82rem;color:var(--gray-400);margin:-.25rem 0 1rem">Authority accounts can be assigned to zones. They log in via the Admin Panel.</p>
+    <div class="m-field">
+      <label class="m-label">Full Name <span style="color:var(--red)">*</span></label>
+      <input class="m-input" id="caName" placeholder="e.g. Ramesh Sharma" />
+    </div>
+    <div class="m-field">
+      <label class="m-label">Phone Number <span style="color:var(--red)">*</span></label>
+      <input class="m-input" id="caPhone" placeholder="10-digit mobile number" maxlength="15" />
+    </div>
+    <div class="m-field">
+      <label class="m-label">Email <span style="font-size:.75rem;color:var(--gray-400)">(optional)</span></label>
+      <input class="m-input" id="caEmail" placeholder="email@example.com" type="email" />
+    </div>
+    <div class="m-field">
+      <label class="m-label">Assigned Area <span style="font-size:.75rem;color:var(--gray-400)">(optional)</span></label>
+      <input class="m-input" id="caArea" placeholder="e.g. Ward 12 – Andheri East" />
+    </div>
+    <div class="m-field">
+      <label class="m-label">Password <span style="color:var(--red)">*</span></label>
+      <div style="position:relative">
+        <input class="m-input" id="caPassword" type="password" placeholder="Min 6 characters" style="padding-right:2.5rem" />
+        <button onclick="togglePwVis('caPassword',this)" style="position:absolute;right:.6rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:.85rem;color:var(--gray-400)">👁</button>
+      </div>
+    </div>
+    <div id="caError" style="display:none;color:var(--red);font-size:.82rem;padding:.5rem .75rem;background:#FFF5F5;border-radius:var(--radius-md);border:1px solid #FECACA;margin-top:.25rem"></div>
+    <div class="modal-acts" style="margin-top:1.25rem">
+      <button class="btn-cancel" onclick="closeModal('createAuthorityModal')">Cancel</button>
+      <button class="btn-confirm" id="caSubmitBtn" onclick="submitCreateAuthority()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/core/api.config.js?v=12"></script>
+<script src="../js/ui/admin.ui.js?v=12"></script>
+</body>
+</html>

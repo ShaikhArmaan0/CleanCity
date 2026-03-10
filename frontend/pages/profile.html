@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>My Profile – CleanCity</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    :root { --psb-width: 220px; --psb-collapsed: 56px; --nav-h: 64px; }
+    body { background:var(--gray-50); min-height:100vh; overflow-x:hidden; }
+
+    /* Layout */
+    .profile-layout {
+      display: grid;
+      grid-template-columns: var(--psb-width) 1fr;
+      min-height: calc(100vh - var(--nav-h));
+      margin-top: var(--nav-h);
+      transition: grid-template-columns .25s ease;
+    }
+    .profile-layout.sb-collapsed { grid-template-columns: var(--psb-collapsed) 1fr; }
+
+    /* Sidebar */
+    .profile-sidebar {
+      position: sticky;
+      top: var(--nav-h);
+      height: calc(100vh - var(--nav-h));
+      background: white;
+      border-right: 1px solid var(--gray-100);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 50;
+      box-shadow: 2px 0 8px rgba(0,0,0,.04);
+    }
+    .psb-head {
+      padding: 1.25rem 1rem 1rem;
+      border-bottom: 1px solid var(--gray-100);
+      display: flex; align-items: center; gap: .75rem;
+      overflow: hidden; flex-shrink: 0;
+    }
+    .psb-av {
+      width:38px; height:38px; border-radius:50%;
+      background:linear-gradient(135deg,var(--green-400),var(--green-600));
+      display:flex; align-items:center; justify-content:center;
+      font-size:1rem; font-weight:700; color:white; flex-shrink:0;
+    }
+    .psb-info { overflow:hidden; white-space:nowrap; transition:opacity .15s,width .25s; }
+    .psb-name { font-weight:700; font-size:.875rem; color:var(--gray-900); overflow:hidden; text-overflow:ellipsis; }
+    .psb-role { font-size:.72rem; color:var(--green-600); font-weight:600; text-transform:capitalize; }
+    .sb-collapsed .psb-info { opacity:0; width:0; }
+
+    .psb-nav { flex:1; padding:.75rem .5rem; overflow-y:auto; overflow-x:hidden; }
+    .psb-nav ul { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; }
+    .psb-nav li a {
+      display:flex; align-items:center; gap:.6rem;
+      padding:.55rem .6rem; border-radius:var(--radius-md);
+      font-size:.85rem; font-weight:500; color:var(--gray-600);
+      cursor:pointer; user-select:none; white-space:nowrap; overflow:hidden;
+      transition:all .18s; text-decoration:none;
+    }
+    .psb-nav li a:hover { background:var(--gray-50); color:var(--gray-900); }
+    .psb-nav li a.active { background:var(--green-50); color:var(--green-700); font-weight:600; }
+    .nav-ico { width:20px; height:20px; flex-shrink:0; font-size:1.05rem; display:flex; align-items:center; justify-content:center; }
+    .nav-lbl { overflow:hidden; transition:opacity .15s,width .25s; }
+    .sb-collapsed .nav-lbl { opacity:0; width:0; }
+
+    .psb-sec { font-size:.63rem; font-weight:700; color:var(--gray-400); text-transform:uppercase; letter-spacing:.08em; padding:.5rem .6rem .2rem; white-space:nowrap; overflow:hidden; transition:opacity .15s; }
+    .sb-collapsed .psb-sec { opacity:0; height:14px; }
+
+    .psb-footer { border-top:1px solid var(--gray-100); padding:.75rem .5rem; flex-shrink:0; }
+    .psb-logout {
+      display:flex; align-items:center; gap:.6rem;
+      padding:.5rem .6rem; border-radius:var(--radius-md);
+      font-size:.85rem; font-weight:500; color:#DC2626;
+      cursor:pointer; white-space:nowrap; overflow:hidden;
+      background:none; border:none; width:100%; transition:background .15s;
+    }
+    .psb-logout:hover { background:#FFF5F5; }
+
+    /* Collapse toggle button */
+    .psb-toggle {
+      position: fixed;
+      top: calc(var(--nav-h) + 10px);
+      left: calc(var(--psb-width) - 13px);
+      z-index: 200;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: white;
+      border: 1.5px solid var(--gray-200);
+      color: var(--gray-500);
+      cursor: pointer;
+      font-size: .7rem;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 1px 6px rgba(0,0,0,.12);
+      transition: left .25s ease;
+    }
+    .sb-collapsed .psb-toggle,
+    .profile-layout.sb-collapsed ~ .psb-toggle { left: calc(var(--psb-collapsed) - 13px); }
+    #psbToggle { transition: left .25s ease; }
+    .psb-toggle:hover { border-color:var(--green-400); color:var(--green-700); background:var(--green-50); }
+
+    /* Main area */
+    .profile-main { padding:2rem 2rem 4rem; min-width:0; }
+
+    /* Sections */
+    .profile-section { display:none; }
+    .profile-section.active { display:block; }
+
+    /* Hero */
+    .profile-hero { background:linear-gradient(135deg,var(--green-700) 0%,var(--green-500) 100%); border-radius:var(--radius-xl); padding:2rem; color:white; margin-bottom:1.5rem; display:flex; align-items:center; gap:1.5rem; box-shadow:var(--shadow-green); }
+    .profile-avatar { width:80px; height:80px; border-radius:50%; background:rgba(255,255,255,.25); display:flex; align-items:center; justify-content:center; font-size:2.2rem; font-weight:700; flex-shrink:0; border:3px solid rgba(255,255,255,.4); }
+    .profile-hero-info h2 { margin:0 0 .25rem; font-size:1.4rem; font-weight:700; }
+    .profile-hero-info p { margin:0; opacity:.85; font-size:.9rem; }
+    .profile-role-badge { display:inline-block; background:rgba(255,255,255,.2); padding:.15rem .7rem; border-radius:var(--radius-full); font-size:.75rem; font-weight:700; margin-top:.4rem; border:1px solid rgba(255,255,255,.35); }
+    .stat-row { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1.5rem; }
+    .stat-card { background:white; border-radius:var(--radius-lg); padding:1.2rem; text-align:center; box-shadow:var(--shadow-sm); border:1.5px solid var(--gray-100); }
+    .stat-num { font-size:1.8rem; font-weight:800; color:var(--green-700); }
+    .stat-lbl { font-size:.75rem; color:var(--gray-400); margin-top:.2rem; font-weight:600; text-transform:uppercase; letter-spacing:.04em; }
+    .profile-card { background:white; border-radius:var(--radius-xl); box-shadow:var(--shadow-sm); border:1.5px solid var(--gray-100); margin-bottom:1.5rem; overflow:hidden; }
+    .pc-header { padding:1.1rem 1.5rem; border-bottom:1px solid var(--gray-100); display:flex; align-items:center; justify-content:space-between; }
+    .pc-title { font-weight:700; font-size:1rem; color:var(--gray-900); display:flex; align-items:center; gap:.5rem; }
+    .pc-body { padding:1.5rem; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    @media(max-width:520px){ .form-row { grid-template-columns:1fr; } }
+    .save-btn { background:var(--green-600); color:white; border:none; border-radius:var(--radius-md); padding:.7rem 1.5rem; font-weight:700; font-size:.9rem; cursor:pointer; transition:background .2s; }
+    .save-btn:hover { background:var(--green-700); }
+    .save-btn:disabled { opacity:.6; cursor:default; }
+    .phone-note { font-size:.78rem; color:var(--gray-400); margin-top:.25rem; }
+    .danger-zone { border:1.5px solid #FECACA; background:#FFF5F5; border-radius:var(--radius-xl); padding:1.5rem; margin-bottom:1.5rem; }
+    .danger-title { font-weight:700; color:#DC2626; margin-bottom:1rem; display:flex; align-items:center; gap:.4rem; }
+    .delete-acc-btn { background:#FEE2E2; color:#DC2626; border:1.5px solid #FECACA; border-radius:var(--radius-md); padding:.6rem 1.2rem; font-weight:700; cursor:pointer; font-size:.875rem; transition:all .2s; }
+    .delete-acc-btn:hover { background:#DC2626; color:white; }
+    .section-tag { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--green-700); background:var(--green-50); padding:.2rem .6rem; border-radius:var(--radius-full); border:1px solid var(--green-200); }
+    .section-heading { font-size:1.3rem; font-weight:800; color:var(--gray-900); margin-bottom:1.5rem; display:flex; align-items:center; gap:.5rem; }
+
+    @media(max-width:720px) {
+      .profile-layout { grid-template-columns: 1fr; }
+      .profile-sidebar { position:fixed; left:0; top:var(--nav-h); height:calc(100vh - var(--nav-h)); transform:translateX(-100%); transition:transform .25s ease; width:var(--psb-width) !important; }
+      .profile-layout.sb-open .profile-sidebar { transform:translateX(0); box-shadow:4px 0 20px rgba(0,0,0,.15); }
+      #psbToggle { left:8px !important; }
+      .profile-main { padding:1.25rem 1rem 3rem; }
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar scrolled">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo"><div class="nav-logo-icon">♻</div> CleanCity</a>
+    <div class="nav-actions">
+      <a href="complaints.html" class="btn btn-ghost btn-sm">Reports</a>
+      <a href="dashboard.html" class="btn btn-ghost btn-sm">Dashboard</a>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Collapse/Expand Toggle -->
+<button class="psb-toggle" id="psbToggle" onclick="toggleProfileSidebar()" title="Toggle sidebar">◀</button>
+
+<div class="profile-layout" id="profileLayout">
+
+  <!-- Sidebar -->
+  <aside class="profile-sidebar">
+    <div class="psb-head">
+      <div class="psb-av" id="sbAvatar">?</div>
+      <div class="psb-info">
+        <div class="psb-name" id="sbName">Loading…</div>
+        <div class="psb-role" id="sbRole">citizen</div>
+      </div>
+    </div>
+
+    <nav class="psb-nav">
+      <ul>
+        <li class="psb-sec">Overview</li>
+        <li><a onclick="showProfileSection('overview')" id="pnav-overview" class="active">
+          <span class="nav-ico">🏠</span><span class="nav-lbl">Overview</span>
+        </a></li>
+        <li class="psb-sec">Account</li>
+        <li><a onclick="showProfileSection('edit')" id="pnav-edit">
+          <span class="nav-ico">👤</span><span class="nav-lbl">Edit Profile</span>
+        </a></li>
+        <li><a onclick="showProfileSection('password')" id="pnav-password">
+          <span class="nav-ico">🔑</span><span class="nav-lbl">Change Password</span>
+        </a></li>
+        <li class="psb-sec">Activity</li>
+        <li><a href="complaints.html?filter=my">
+          <span class="nav-ico">📋</span><span class="nav-lbl">My Reports</span>
+        </a></li>
+        <li><a href="track.html">
+          <span class="nav-ico">🔍</span><span class="nav-lbl">Track Report</span>
+        </a></li>
+        <li><a href="report.html">
+          <span class="nav-ico">＋</span><span class="nav-lbl">File New Report</span>
+        </a></li>
+      </ul>
+    </nav>
+
+    <div class="psb-footer">
+      <button class="psb-logout" onclick="logout()">
+        <span class="nav-ico">🚪</span><span class="nav-lbl">Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="profile-main">
+
+    <!-- OVERVIEW -->
+    <div class="profile-section active" id="section-overview">
+      <div class="profile-hero">
+        <div class="profile-avatar" id="profileAvatar">?</div>
+        <div class="profile-hero-info">
+          <h2 id="heroName">Loading…</h2>
+          <p id="heroPhone">—</p>
+          <div class="profile-role-badge" id="heroRole">user</div>
+        </div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-num" id="statReports">–</div>
+          <div class="stat-lbl">Reports Filed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statResolved">–</div>
+          <div class="stat-lbl">Resolved</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statVotes">–</div>
+          <div class="stat-lbl">Votes Cast</div>
+        </div>
+      </div>
+      <div class="profile-card">
+        <div class="pc-header"><div class="pc-title">📋 Quick Actions</div></div>
+        <div class="pc-body" style="display:flex;gap:1rem;flex-wrap:wrap">
+          <a href="complaints.html?filter=my" class="btn btn-ghost">📋 My Reports</a>
+          <a href="track.html" class="btn btn-ghost">🔍 Track a Report</a>
+          <a href="report.html" class="btn btn-primary">＋ File New Report</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT PROFILE -->
+    <div class="profile-section" id="section-edit">
+      <div class="section-heading">👤 Edit Profile</div>
+      <div class="profile-card">
+        <div class="pc-header">
+          <div class="pc-title">Personal Information</div>
+          <span class="section-tag">Editable</span>
+        </div>
+        <div class="pc-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input type="text" id="pName" class="form-input" placeholder="Your name">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input type="email" id="pEmail" class="form-input" placeholder="your@email.com">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="text" id="pPhone" class="form-input" disabled style="background:var(--gray-50);cursor:not-allowed">
+            <div class="phone-note">📞 Phone number is tied to your OTP login and cannot be changed here.</div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Area / Locality</label>
+              <input type="text" id="pArea" class="form-input" placeholder="e.g. Kurla West">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Address</label>
+              <input type="text" id="pAddress" class="form-input" placeholder="Your full address">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Bio <span style="color:var(--gray-400);font-weight:400">(optional)</span></label>
+            <textarea id="pBio" class="form-input" rows="2" placeholder="A short note about yourself…" style="resize:vertical"></textarea>
+          </div>
+          <button class="save-btn" id="saveInfoBtn" onclick="saveProfile()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHANGE PASSWORD + DANGER -->
+    <div class="profile-section" id="section-password">
+      <div class="section-heading">🔑 Change Password</div>
+      <div class="profile-card">
+        <div class="pc-header">
+          <div class="pc-title">Update Password</div>
+          <span class="section-tag">Security</span>
+        </div>
+        <div class="pc-body">
+          <div class="form-group">
+            <label class="form-label">Current Password</label>
+            <input type="password" id="pOldPw" class="form-input" placeholder="Enter current password" autocomplete="current-password">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">New Password</label>
+              <input type="password" id="pNewPw" class="form-input" placeholder="Min 8 characters" autocomplete="new-password">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirm New Password</label>
+              <input type="password" id="pConfirmPw" class="form-input" placeholder="Repeat new password" autocomplete="new-password">
+            </div>
+          </div>
+          <button class="save-btn" id="savePwBtn" onclick="changePassword()">Update Password</button>
+        </div>
+      </div>
+      <div class="danger-zone">
+        <div class="danger-title">⚠️ Danger Zone</div>
+        <p style="font-size:.875rem;color:var(--gray-600);margin-bottom:1rem">Deleting your account is permanent. All your reports and activity will be removed.</p>
+        <button class="delete-acc-btn" onclick="confirmDeleteAccount()">🗑 Delete My Account</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  function toggleProfileSidebar() {
+    const layout = document.getElementById('profileLayout');
+    const btn    = document.getElementById('psbToggle');
+    const isMob  = window.innerWidth <= 720;
+    if (isMob) {
+      layout.classList.toggle('sb-open');
+      btn.textContent = layout.classList.contains('sb-open') ? '✕' : '☰';
+    } else {
+      layout.classList.toggle('sb-collapsed');
+      // Move toggle button
+      const collapsed = layout.classList.contains('sb-collapsed');
+      btn.style.left = collapsed
+        ? 'calc(var(--psb-collapsed) - 13px)'
+        : 'calc(var(--psb-width) - 13px)';
+      btn.textContent = collapsed ? '▶' : '◀';
+    }
+  }
+
+  function showProfileSection(name) {
+    document.querySelectorAll('.profile-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.psb-nav a[id^="pnav-"]').forEach(a => a.classList.remove('active'));
+    const sec = document.getElementById('section-' + name);
+    const nav = document.getElementById('pnav-' + name);
+    if (sec) sec.classList.add('active');
+    if (nav) nav.classList.add('active');
+    if (window.innerWidth <= 720) {
+      document.getElementById('profileLayout').classList.remove('sb-open');
+      document.getElementById('psbToggle').textContent = '☰';
+    }
+    window.scrollTo(0,0);
+  }
+  window.showProfileSection = showProfileSection;
+
+  // Initial icon for mobile
+  if (window.innerWidth <= 720) {
+    document.getElementById('psbToggle').textContent = '☰';
+  }
+</script>
+<script src="../js/core/api.config.js?v=12"></script>
+<script src="../js/ui/profile.ui.js?v=12"></script>
+</body>
+</html>

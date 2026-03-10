@@ -91,6 +91,7 @@ def create_complaint():
         "category": data.get("category"),
         "description": data.get("description"),
         "address": data.get("address", ""),
+        "region":  data.get("region", "").strip(),
         "latitude": data.get("latitude"),
         "longitude": data.get("longitude"),
         "visibility": data.get("visibility", "public"),
@@ -178,6 +179,40 @@ def update_complaint_status(complaint_id):
 
     return jsonify({"message": "Status updated", "new_status": new_status}), 200
 
+
+# ================= DELETE COMPLAINT (owner only) =================
+@complaint_bp.route("/<complaint_id>", methods=["DELETE"])
+@jwt_required()
+def delete_complaint(complaint_id):
+    user_id = get_jwt_identity()
+    try:
+        oid = ObjectId(complaint_id)
+    except Exception:
+        return jsonify({"error": "Invalid complaint ID"}), 400
+
+    complaint = extensions.db.complaints.find_one({"_id": oid})
+    if not complaint:
+        return jsonify({"error": "Complaint not found"}), 404
+
+    # Only the owner (or admin/authority) may delete
+    user = extensions.db.users.find_one({"_id": ObjectId(user_id)}, {"role": 1})
+    is_admin = user and user.get("role") in ("admin", "authority")
+    if complaint["user_id"] != user_id and not is_admin:
+        return jsonify({"error": "Not authorised to delete this complaint"}), 403
+
+    # Cascade delete all linked data
+    extensions.db.votes.delete_many({"complaint_id": complaint_id})
+    extensions.db.comments.delete_many({"complaint_id": complaint_id})
+    extensions.db.notifications.delete_many({"complaint_id": complaint_id})
+    extensions.db.complaints.delete_one({"_id": oid})
+
+    # Reverse the +10 cleanlinessScore given on creation
+    extensions.db.users.update_one(
+        {"_id": ObjectId(complaint["user_id"])},
+        {"$inc": {"cleanlinessScore": -10}}
+    )
+
+    return jsonify({"message": "Complaint deleted successfully"}), 200
 
 # ================= GET SINGLE COMPLAINT =================
 @complaint_bp.route("/<complaint_id>", methods=["GET"])
