@@ -101,8 +101,8 @@ function goUnassigned() {
   document.getElementById('section-complaints').classList.add('active');
   document.getElementById('nav-unassigned').classList.add('active');
   _cPage = 1;
-  // Set filters THEN load
-  document.getElementById('cStatus').value   = 'submitted';
+  // Show all unassigned that are NOT resolved
+  document.getElementById('cStatus').value   = 'active';   // active = submitted + in_progress
   document.getElementById('cAssigned').value = 'no';
   document.getElementById('cSort').value     = 'priority';
   document.getElementById('cSearch').value   = '';
@@ -118,12 +118,12 @@ function goPriority() {
   document.getElementById('section-complaints').classList.add('active');
   document.getElementById('nav-priority').classList.add('active');
   _cPage = 1;
-  // Show all unresolved sorted by priority (high first, then most votes)
+  // Show all active (submitted + in_progress) sorted by priority
   document.getElementById('cSearch').value   = '';
   document.getElementById('cArea').value     = '';
   document.getElementById('cCat').value      = '';
   document.getElementById('cAssigned').value = '';
-  document.getElementById('cStatus').value   = 'submitted';   // only submitted = unresolved active
+  document.getElementById('cStatus').value   = 'active';   // active = non-resolved
   document.getElementById('cSort').value     = 'priority';
   loadComplaints();
 }

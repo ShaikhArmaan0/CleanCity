@@ -1,4 +1,4 @@
-</html> <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -6,18 +6,32 @@
   <title>Dashboard – CleanCity</title>
   <link rel="stylesheet" href="../css/styles.css">
   <style>
-    .dashboard-layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh;padding-top:var(--nav-height)}
-    .sidebar{background:white;border-right:1px solid var(--gray-100);padding:2rem 1.25rem;position:sticky;top:var(--nav-height);height:calc(100vh - var(--nav-height));overflow-y:auto}
-    .user-avatar{width:64px;height:64px;background:linear-gradient(135deg,var(--green-400),var(--green-600));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;color:white;margin:0 auto 1rem}
-    .user-name{font-weight:700;font-size:1.05rem;text-align:center;color:var(--gray-900)}
-    .user-role{text-align:center;font-size:0.8rem;color:var(--gray-500);margin-bottom:1.5rem;text-transform:capitalize}
-    .sidebar-nav{list-style:none;display:flex;flex-direction:column;gap:0.25rem}
-    .sidebar-nav a{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;border-radius:var(--radius-md);font-weight:500;font-size:0.9rem;color:var(--gray-700);transition:all 0.2s}
+    :root { --dsb-width: 260px; --dsb-collapsed: 60px; }
+    html, body { height: 100%; overflow: hidden; }
+    .dashboard-layout{display:grid;grid-template-columns:var(--dsb-width) 1fr;height:calc(100vh - var(--nav-height));margin-top:var(--nav-height);transition:grid-template-columns .25s ease}
+    .dashboard-layout.dsb-collapsed{grid-template-columns:var(--dsb-collapsed) 1fr}
+    .sidebar{background:white;border-right:1px solid var(--gray-100);padding:2rem 1.25rem;height:100%;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;transition:padding .25s ease;flex-shrink:0}
+    .dsb-collapsed .sidebar{padding:1rem .5rem}
+    /* Collapse toggle */
+    .dsb-toggle{position:fixed;top:calc(var(--nav-height) + 10px);left:calc(var(--dsb-width) - 13px);z-index:200;width:26px;height:26px;border-radius:50%;background:white;border:1.5px solid var(--gray-200);color:var(--gray-500);cursor:pointer;font-size:.7rem;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px rgba(0,0,0,.12);transition:left .25s ease}
+    .dsb-collapsed .dsb-toggle{left:calc(var(--dsb-collapsed) - 13px)}
+    .dsb-toggle:hover{border-color:var(--green-400);color:var(--green-700);background:var(--green-50)}
+    /* Sidebar content hide when collapsed */
+    .dsb-collapsed .sidebar-label,.dsb-collapsed .user-name,.dsb-collapsed .user-role,.dsb-collapsed .sidebar-nav span:not(.sidebar-icon){opacity:0;width:0;overflow:hidden;transition:opacity .15s,width .25s}
+    .dsb-collapsed .user-avatar{margin-bottom:.5rem}
+    .dsb-collapsed .sidebar-section-label{visibility:hidden;height:10px;margin:0}
+    .user-avatar{width:64px;height:64px;background:linear-gradient(135deg,var(--green-400),var(--green-600));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;color:white;margin:0 auto 1rem;flex-shrink:0}
+    .user-name{font-weight:700;font-size:1.05rem;text-align:center;color:var(--gray-900);white-space:nowrap;overflow:hidden}
+    .user-role{text-align:center;font-size:0.8rem;color:var(--gray-500);margin-bottom:1.5rem;text-transform:capitalize;white-space:nowrap;overflow:hidden}
+    .sidebar-nav{list-style:none;display:flex;flex-direction:column;gap:0.25rem;flex:1}
+    .sidebar-nav a{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;border-radius:var(--radius-md);font-weight:500;font-size:0.9rem;color:var(--gray-700);transition:all 0.2s;white-space:nowrap;overflow:hidden}
+    .dsb-collapsed .sidebar-nav a{padding:.75rem;justify-content:center;gap:0}
     .sidebar-nav a:hover,.sidebar-nav a.active{background:var(--green-50);color:var(--green-700)}
     .sidebar-nav a.active{font-weight:600}
-    .sidebar-icon{font-size:1.1rem;width:20px;text-align:center}
+    .sidebar-icon{font-size:1.1rem;width:20px;text-align:center;flex-shrink:0}
     .sidebar-divider{height:1px;background:var(--gray-100);margin:1rem 0}
-    .main-content{padding:2rem;background:var(--gray-50)}
+    .sidebar-section-label{font-size:.63rem;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.08em;padding:.25rem 1rem .1rem;white-space:nowrap;overflow:hidden;transition:opacity .15s}
+    .main-content{padding:2rem;background:var(--gray-50);height:100%;overflow-y:auto}
     .page-greeting{margin-bottom:2rem}
     .greeting-text{font-family:var(--font-display);font-size:1.8rem;font-weight:600;color:var(--gray-900)}
     .greeting-sub{color:var(--gray-500);margin-top:0.25rem}
@@ -52,7 +66,7 @@
     .activity-text{font-size:0.85rem;color:var(--gray-700)}
     .activity-time{font-size:0.75rem;color:var(--gray-400);margin-top:2px}
     @media(max-width:1024px){.stats-cards{grid-template-columns:repeat(2,1fr)}.content-grid{grid-template-columns:1fr}}
-    @media(max-width:768px){.dashboard-layout{grid-template-columns:1fr}.sidebar{display:none}.main-content{padding:1rem}}
+    @media(max-width:768px){html,body{overflow:auto}.dashboard-layout,.dashboard-layout.dsb-collapsed{grid-template-columns:1fr;height:auto;margin-top:var(--nav-height)}.sidebar{position:fixed;left:0;top:var(--nav-height);height:calc(100vh - var(--nav-height));transform:translateX(-100%);transition:transform .25s ease;z-index:100;width:var(--dsb-width) !important}.dashboard-layout.dsb-open .sidebar{transform:translateX(0);box-shadow:4px 0 20px rgba(0,0,0,.15)}.dsb-toggle{left:8px !important}.main-content{padding:1rem;height:auto;overflow-y:visible}}
   </style>
 </head>
 <body>
@@ -66,6 +80,7 @@
       <li><a href="report.html">Report Waste</a></li>
     </ul>
     <div class="nav-actions">
+      <a href="profile.html" class="btn btn-ghost btn-sm">👤 Profile</a>
       <button onclick="logout()" class="btn btn-ghost btn-sm">Logout</button>
       <a href="report.html" class="btn btn-primary btn-sm">Report Now</a>
     </div>
@@ -81,20 +96,24 @@
   <a href="#" onclick="logout()">🚪 Logout</a>
 </div>
 
-<div class="dashboard-layout">
+<button class="dsb-toggle" id="dsbToggle" onclick="toggleDashSidebar()" title="Toggle sidebar">◀</button>
+
+<div class="dashboard-layout" id="dashLayout">
   <aside class="sidebar">
     <div class="user-avatar" id="userAvatar">?</div>
     <div class="user-name" id="sidebarName">Loading...</div>
     <div class="user-role" id="sidebarRole">Citizen</div>
     <ul class="sidebar-nav">
-      <li><a href="dashboard.html" class="active"><span class="sidebar-icon">📊</span> Dashboard</a></li>
-      <li><a href="complaints.html?mine=true"><span class="sidebar-icon">📋</span> My Complaints</a></li>
-      <li><a href="complaints.html"><span class="sidebar-icon">🌍</span> City Complaints</a></li>
-      <li><a href="report.html"><span class="sidebar-icon">📢</span> Report Waste</a></li>
-      <li><a href="track.html"><span class="sidebar-icon">🔍</span> Track Complaint</a></li>
-      <li><a href="notifications.html"><span class="sidebar-icon">🔔</span> Notifications <span id="sidebarNotifBadge" style="background:var(--green-600);color:white;border-radius:10px;padding:1px 7px;font-size:0.72rem;margin-left:4px;display:none">0</span></a></li>
+      <li><a href="dashboard.html" class="active"><span class="sidebar-icon">📊</span> <span>Dashboard</span></a></li>
+      <li><a href="complaints.html?mine=true"><span class="sidebar-icon">📋</span> <span>My Complaints</span></a></li>
+      <li><a href="complaints.html"><span class="sidebar-icon">🌍</span> <span>City Complaints</span></a></li>
+      <li><a href="report.html"><span class="sidebar-icon">📢</span> <span>Report Waste</span></a></li>
+      <li><a href="track.html"><span class="sidebar-icon">🔍</span> <span>Track Complaint</span></a></li>
+      <li><a href="notifications.html"><span class="sidebar-icon">🔔</span> <span>Notifications <span id="sidebarNotifBadge" style="background:var(--green-600);color:white;border-radius:10px;padding:1px 7px;font-size:0.72rem;margin-left:4px;display:none">0</span></span></a></li>
       <div class="sidebar-divider"></div>
-      <li><a href="#" onclick="logout()"><span class="sidebar-icon">🚪</span> Logout</a></li>
+      <li><a href="profile.html"><span class="sidebar-icon">👤</span> <span>Profile</span></a></li>
+      <div class="sidebar-divider"></div>
+      <li><a href="#" onclick="logout()"><span class="sidebar-icon">🚪</span> <span>Logout</span></a></li>
     </ul>
   </aside>
 
@@ -173,7 +192,26 @@
 
 
 
-<script src="../js/core/api.config.js?v=2"></script>
-<script src="../js/ui/dashboard.ui.js"></script>
+<script>
+  function toggleDashSidebar() {
+    const layout = document.getElementById('dashLayout');
+    const btn    = document.getElementById('dsbToggle');
+    const isMob  = window.innerWidth <= 768;
+    if (isMob) {
+      layout.classList.toggle('dsb-open');
+      btn.textContent = layout.classList.contains('dsb-open') ? '✕' : '☰';
+    } else {
+      layout.classList.toggle('dsb-collapsed');
+      const collapsed = layout.classList.contains('dsb-collapsed');
+      btn.style.left  = collapsed ? 'calc(var(--dsb-collapsed) - 13px)' : 'calc(var(--dsb-width) - 13px)';
+      btn.textContent = collapsed ? '▶' : '◀';
+    }
+  }
+  if (window.innerWidth <= 768) {
+    document.getElementById('dsbToggle').textContent = '☰';
+  }
+</script>
+<script src="../js/core/api.config.js?v=12"></script>
+<script src="../js/ui/dashboard.ui.js?v=11"></script>
 </body>
 </html>

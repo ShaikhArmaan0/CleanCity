@@ -10,7 +10,9 @@ document.getElementById('hamburger').addEventListener('click', function () {
 
 // ── Auth-aware nav ────────────────────────────────────────────
 document.getElementById('navActions').innerHTML = Auth.isLoggedIn()
-  ? '<a href="dashboard.html" class="btn btn-ghost btn-sm">Dashboard</a>'
+  ? `<a href="dashboard.html" class="btn btn-ghost btn-sm">Dashboard</a>
+     <a href="profile.html" class="btn btn-ghost btn-sm">👤 Profile</a>
+     <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>`
   : '<a href="login.html" class="btn btn-primary btn-sm">Login</a>';
 
 // ── Constants ─────────────────────────────────────────────────

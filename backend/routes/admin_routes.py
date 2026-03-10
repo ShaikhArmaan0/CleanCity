@@ -148,7 +148,7 @@ def admin_stats():
         "submitted":         extensions.db.complaints.count_documents({"status": "submitted"}),
         "in_progress":       extensions.db.complaints.count_documents({"status": "in_progress"}),
         "resolved":          extensions.db.complaints.count_documents({"status": "resolved"}),
-        "unassigned":        extensions.db.complaints.count_documents({"assigned_to": {"$exists": False}, "status": "submitted"}),
+        "unassigned":        extensions.db.complaints.count_documents({"assigned_to": {"$exists": False}, "status": {"$in": ["submitted", "in_progress"]}}),
         "total_votes":       extensions.db.votes.count_documents({}),
         "total_comments":    extensions.db.comments.count_documents({}),
         "new_contacts":      extensions.db.contact_messages.count_documents({"status": "new"}),
@@ -407,7 +407,10 @@ def admin_list_complaints():
     per_page = min(int(request.args.get("per_page", 20)), 100)
 
     query = {}
-    if status:   query["status"]   = status
+    if status == "active":
+        query["status"] = {"$in": ["submitted", "in_progress"]}
+    elif status:
+        query["status"] = status
     if category: query["category"] = category
     if area:
         area_filter = {"$or": [

@@ -49,6 +49,8 @@ def verify_otp():
     temp_token = create_access_token(identity=phone)
 
     if existing_user:
+        if existing_user.get("role") in ("authority", "admin"):
+            return jsonify({"error": "Authority and admin accounts must log in via the Admin Panel."}), 403
         real_token = create_access_token(identity=str(existing_user["_id"]))
         return jsonify({
             "message": "OTP verified",
@@ -165,6 +167,9 @@ def get_current_user():
     user = extensions.db.users.find_one({"_id": oid}, {"password": 0})
     if not user:
         return jsonify({"error": "User not found"}), 404
+
+    if user.get("role") in ("authority", "admin"):
+        return jsonify({"error": "Admin/authority accounts cannot access the user panel."}), 403
 
     user["_id"] = str(user["_id"])
     if isinstance(user.get("created_at"), datetime):

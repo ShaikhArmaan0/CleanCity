@@ -406,6 +406,7 @@
           <input class="adm-input" id="cArea" placeholder="📍 Filter area…" oninput="dbc(loadComplaints,400)()" style="min-width:120px">
           <select class="adm-select" id="cStatus" onchange="loadComplaints()">
             <option value="">All Status</option>
+            <option value="active">Active (Non-Resolved)</option>
             <option value="submitted">Submitted</option>
             <option value="in_progress">In Progress</option>
             <option value="resolved">Resolved</option>
