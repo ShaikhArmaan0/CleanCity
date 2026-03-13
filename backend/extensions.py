@@ -5,15 +5,14 @@ from pymongo import MongoClient
 jwt  = JWTManager()
 cors = CORS()
 
-# Global DB reference — populated by init_db() called from app.py
 client = None
 db     = None
 
-def init_db(mongo_uri):
-    """Called once from create_app() to connect to MongoDB."""
+def init_db(app):
     global client, db
+    mongo_uri = app.config.get("MONGO_URI", "mongodb://localhost:27017/cleancity")
     client = MongoClient(mongo_uri)
-    # Extract database name from URI, default to 'cleancity'
-    db_name = mongo_uri.rstrip("/").split("/")[-1] or "cleancity"
+    # Extract DB name from URI or default to "cleancity"
+    db_name = mongo_uri.split("/")[-1].split("?")[0] or "cleancity"
     db = client[db_name]
-    return db
+    app.extensions["db"] = db

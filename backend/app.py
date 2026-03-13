@@ -19,7 +19,7 @@ def create_app():
         "http://localhost:5500",
         "http://127.0.0.1:5500",
         "http://127.0.0.1:3000",
-        "https://yourusername.github.io",  # ← replace with your GitHub username
+        "https://shaikharmaan0.github.io/CleanCity/",  # ← replace with your GitHub username
     ]}})
     init_db(app)
 
