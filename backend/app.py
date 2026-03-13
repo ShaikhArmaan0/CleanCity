@@ -19,7 +19,7 @@ def create_app():
         "http://localhost:5500",
         "http://127.0.0.1:5500",
         "http://127.0.0.1:3000",
-        "https://shaikharmaan0.github.io/CleanCity/",  # ← replace with your GitHub username
+        "https://shaikharmaan0.github.io",
     ]}})
     init_db(app)
 
@@ -36,4 +36,4 @@ def create_app():
 app = create_app()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(debug=True)
