@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Terms & Conditions – CleanCity</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    body { background:var(--gray-50); min-height:100vh; }
+    .legal-wrap { max-width:820px; margin:0 auto; padding:6rem 1.5rem 4rem; }
+    .legal-hero { background:linear-gradient(135deg,var(--green-700),var(--green-500)); border-radius:var(--radius-xl); padding:2.5rem 2rem; color:white; margin-bottom:2rem; display:flex; align-items:center; gap:1.5rem; box-shadow:var(--shadow-green); }
+    .legal-hero-icon { width:64px; height:64px; background:rgba(255,255,255,.2); border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:center; font-size:2rem; flex-shrink:0; border:1px solid rgba(255,255,255,.3); }
+    .legal-hero h1 { margin:0 0 .35rem; font-size:1.6rem; font-weight:800; }
+    .legal-hero p { margin:0; opacity:.85; font-size:.9rem; }
+    .legal-card { background:white; border-radius:var(--radius-xl); box-shadow:var(--shadow-sm); border:1.5px solid var(--gray-100); margin-bottom:1.25rem; overflow:hidden; }
+    .legal-sec-hdr { padding:1.1rem 1.5rem; border-bottom:1px solid var(--gray-100); display:flex; align-items:center; gap:.75rem; cursor:pointer; user-select:none; transition:background .15s; }
+    .legal-sec-hdr:hover { background:var(--gray-50); }
+    .legal-sec-icon { width:36px; height:36px; border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+    .legal-sec-title { font-weight:700; font-size:.95rem; color:var(--gray-900); flex:1; }
+    .legal-sec-arrow { font-size:.75rem; color:var(--gray-400); transition:transform .2s; }
+    .legal-card.open .legal-sec-arrow { transform:rotate(90deg); }
+    .legal-sec-body { padding:0 1.5rem; max-height:0; overflow:hidden; transition:max-height .3s ease, padding .3s ease; }
+    .legal-card.open .legal-sec-body { max-height:1000px; padding:1.25rem 1.5rem; }
+    .legal-sec-body p { font-size:.875rem; color:var(--gray-600); line-height:1.75; margin:0 0 .75rem; }
+    .legal-sec-body p:last-child { margin-bottom:0; }
+    .legal-sec-body ul { margin:.25rem 0 .75rem 1.25rem; padding:0; }
+    .legal-sec-body ul li { font-size:.875rem; color:var(--gray-600); line-height:1.75; margin-bottom:.25rem; }
+    .legal-sec-body strong { color:var(--gray-800); }
+    .legal-meta { font-size:.78rem; color:var(--gray-400); text-align:center; margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid var(--gray-100); }
+    .legal-nav { display:flex; gap:.75rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+    .legal-nav a { font-size:.82rem; font-weight:600; color:var(--green-700); text-decoration:none; background:var(--green-50); border:1px solid var(--green-200); padding:.3rem .8rem; border-radius:var(--radius-full); transition:all .15s; }
+    .legal-nav a:hover { background:var(--green-100); }
+  </style>
+</head>
+<body>
+<nav class="navbar" id="mainNav">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo"><div class="nav-logo-icon">♻</div> CleanCity</a>
+    <ul class="nav-links" id="navLinks"></ul>
+    <div class="nav-actions" id="navActions"></div>
+    <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu"></div>
+  
+</div>
+
+<div class="legal-wrap">
+
+  <div class="legal-hero">
+    <div class="legal-hero-icon">📋</div>
+    <div>
+      <h1>Terms &amp; Conditions</h1>
+      <p>Please read these terms carefully before using the CleanCity platform.</p>
+    </div>
+  </div>
+
+  <div class="legal-nav">
+    <a href="terms.html">📋 Terms &amp; Conditions</a>
+    <a href="privacy.html">🔒 Privacy Policy</a>
+    <a href="dashboard.html">← Back to Dashboard</a>
+  </div>
+
+  <!-- Section 1 -->
+  <div class="legal-card open">
+    <div class="legal-sec-hdr" onclick="this.parentElement.classList.toggle('open')">
+      <div class="legal-sec-icon" style="background:#EFF6FF;color:#2563EB">📌</div>
+      <div class="legal-sec-title">1. Acceptance of Terms</div>
+      <span class="legal-sec-arrow">▶</span>
+    </div>
+    <div class="legal-sec-body">
+      <p>By accessing or using the CleanCity platform ("Service"), you agree to be bound by these Terms and Conditions. If you do not agree to any part of these terms, you may not use the Service.</p>
+      <p>CleanCity reserves the right to modify these terms at any time. Continued use of the platform after changes constitutes acceptance of the updated terms.</p>
+    </div>
+  </div>
+
+  <!-- Section 2 -->
+  <div class="legal-card">
+    <div class="legal-sec-hdr" onclick="this.parentElement.classList.toggle('open')">
+      <div class="legal-sec-icon" style="background:#F0FDF4;color:#16A34A">👤</div>
+      <div class="legal-sec-title">2. User Accounts &amp; Registration</div>
+      <span class="legal-sec-arrow">▶</span>
+    </div>
+    <div class="legal-sec-body">
+      <p>To use the CleanCity platform, you must register an account using a valid phone number. You are responsible for:</p>
+      <ul>
+        <li>Providing accurate and complete information during registration.</li>
+        <li>Keeping your login credentials secure and confidential.</li>
+        <li>All activity that occurs under your account.</li>
+      </ul>
+      <p>Authority and Admin accounts are managed separately and are not permitted to access the citizen portal. Misuse of these credentials is subject to account suspension.</p>
+    </div>
+  </div>
+
+  <!-- Section 3 -->
+  <div class="legal-card">
+    <div class="legal-sec-hdr" onclick="this.parentElement.classList.toggle('open')">
+      <div class="legal-sec-icon" style="background:#FFF7ED;color:#EA580C">📢</div>
+      <div class="legal-sec-title">3. Acceptable Use of Complaint Reporting</div>
+      <span class="legal-sec-arrow">▶</span>
+    </div>
+    <div class="legal-sec-body">
+      <p>CleanCity's complaint reporting system is designed for legitimate civic issues. You agree to:</p>
+      <ul>
+        <li>Submit only genuine, factual reports of waste or sanitation problems.</li>
+        <li>Not file false, misleading, or duplicate complaints.</li>
+        <li>Not use the platform to harass individuals or specific private properties.</li>
+        <li>Provide accurate location information and descriptions.</li>
+      </ul>
+      <p><strong>Abuse of the reporting system may result in suspension or permanent ban of your account.</strong></p>
+    </div>
+  </div>
+
+  <!-- Section 4 -->
+  <div class="legal-card">
+    <div class="legal-sec-hdr" onclick="this.parentElement.classList.toggle('open')">
+      <div class="legal-sec-icon" style="background:#FDF4FF;color:#9333EA">🗳️</div>
+      <div class="legal-sec-title">4. Voting &amp; Engagement</div>
+      <span class="legal-sec-arrow">▶</span>
+    </div>
+    <div class="legal-sec-body">
+      <p>The platform allows users to upvote complaints to signal urgency. Voting is limited to one vote per complaint per user. Manipulating the voting system through multiple accounts or bots is strictly prohibited.</p>
+      <p>Your CleanlinesScore is calculated based on your genuine engagement — reports, resolutions, and votes. Attempts to artificially inflate scores will result in a permanent ban.</p>
+    </div>
+  </div>
+
+  <!-- Section 5 -->
+  <div class="legal-card">
+    <div class="legal-sec-hdr" onclick="this.parentElement.classList.toggle('open')">
+      <div class="legal-sec-icon" style="background:#FFF1F2;color:#E11D48">⚠️</div>
+      <div class="legal-sec-title">5. Disclaimer of Liability</div>
+      <span class="legal-sec-arrow">▶</span>
+    </div>
+    <div class="legal-sec-body">
+      <p>CleanCity provides this platform as a civic engagement tool. We do not guarantee:</p>
+      <ul>
+        <li>That every complaint will be resolved within a specific timeframe.</li>
+        <li>The accuracy of information submitted by other users.</li>
+        <li>Uninterrupted access to the platform at all times.</li>
+      </ul>
+      <p>The platform is provided "as is" without warranties of any kind. CleanCity is not liable for indirect, incidental, or consequential damages arising from your use of the Service.</p>
+    </div>
+  </div>
+
+  <!-- Section 6 -->
+  <div class="legal-card">
+    <div class="legal-sec-hdr" onclick="this.parentElement.classList.toggle('open')">
+      <div class="legal-sec-icon" style="background:#F0FDF4;color:#16A34A">🔚</div>
+      <div class="legal-sec-title">6. Termination</div>
+      <span class="legal-sec-arrow">▶</span>
+    </div>
+    <div class="legal-sec-body">
+      <p>CleanCity reserves the right to suspend or terminate any account that violates these Terms at any time without prior notice. Users may also delete their accounts from their Profile settings page.</p>
+      <p>Upon termination, your reports and activity history may be retained for administrative and audit purposes as per our data retention policy.</p>
+    </div>
+  </div>
+
+  <!-- Section 7 -->
+  <div class="legal-card">
+    <div class="legal-sec-hdr" onclick="this.parentElement.classList.toggle('open')">
+      <div class="legal-sec-icon" style="background:#EFF6FF;color:#2563EB">⚖️</div>
+      <div class="legal-sec-title">7. Governing Law</div>
+      <span class="legal-sec-arrow">▶</span>
+    </div>
+    <div class="legal-sec-body">
+      <p>These Terms shall be governed by and construed in accordance with the laws of India. Any disputes arising under these Terms shall be subject to the exclusive jurisdiction of courts in Mumbai, Maharashtra.</p>
+    </div>
+  </div>
+
+  <div class="legal-meta">Last updated: March 2026 &nbsp;·&nbsp; CleanCity Civic Platform &nbsp;·&nbsp; <a href="privacy.html" style="color:var(--green-600)">Privacy Policy</a></div>
+</div>
+
+<script src="js/core/api.config.js?v=12"></script>
+
+
+
+
+<script>
+// ── Unified Nav ─────────────────────────────────────────────
+function logout() { if(typeof Auth!=="undefined") Auth.clearSession(); window.location.replace("login.html?logout=1"); }
+(function initNav() {
+  const loggedIn = (typeof Auth !== 'undefined') && Auth.isLoggedIn();
+  const user     = loggedIn ? Auth.getUser() : null;
+  const name     = user ? (user.name || 'Account').split(' ')[0] : '';
+
+  // Desktop: build nav-links dynamically (no hardcoded Dashboard in HTML)
+  const nl = document.getElementById('navLinks');
+  if (nl) {
+    const dashLink = loggedIn ? '<li><a href="dashboard.html">Dashboard</a></li>' : '';
+    nl.innerHTML = `
+      <li><a href="index.html">Home</a></li>
+      ${dashLink}
+      <li><a href="complaints.html">Complaints</a></li>
+      <li><a href="track.html">Track</a></li>
+      <li><a href="report.html">Report Waste</a></li>
+    `;
+    // Mark the active link
+    const page = location.pathname.split('/').pop() || 'index.html';
+    nl.querySelectorAll('a').forEach(a => {
+      if (a.getAttribute('href') === page ||
+          (page === '' && a.getAttribute('href') === 'index.html'))
+        a.classList.add('active');
+    });
+  }
+
+  // Desktop: nav-actions (right side)
+  const na = document.getElementById('navActions');
+  if (na) {
+    na.innerHTML = loggedIn
+      ? `<a href="profile.html" class="btn btn-ghost btn-sm">👤 ${name}</a>
+         <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>`
+      : `<a href="login.html"  class="btn btn-secondary btn-sm">Login</a>
+         <a href="report.html" class="btn btn-primary   btn-sm">Report Now</a>`;
+  }
+
+  // Mobile menu — fully dynamic, no stale hardcoded links
+  const mm = document.getElementById('mobileMenu');
+  if (mm) {
+    mm.innerHTML = loggedIn
+      ? `<a href="index.html">🏠 Home</a>
+         <a href="dashboard.html">📊 Dashboard</a>
+         <a href="complaints.html">📋 Complaints</a>
+         <a href="track.html">🔍 Track</a>
+         <a href="report.html">📢 Report Waste</a>
+         <div class="mobile-divider"></div>
+         <a href="profile.html">👤 Profile</a>
+         <a href="#" onclick="logout()">🚪 Logout</a>`
+      : `<a href="index.html">🏠 Home</a>
+         <a href="complaints.html">📋 Complaints</a>
+         <a href="track.html">🔍 Track</a>
+         <a href="report.html">📢 Report Waste</a>
+         <div class="mobile-divider"></div>
+         <a href="login.html">🔑 Login</a>
+         <a href="report.html">📢 Report Now</a>`;
+  }
+
+  // Hamburger toggle
+  const hb = document.getElementById('hamburger');
+  if (hb && mm) {
+    hb.addEventListener('click', e => {
+      e.stopPropagation();
+      mm.classList.toggle('open');
+      hb.classList.toggle('open');
+    });
+    document.addEventListener('click', e => {
+      if (!hb.contains(e.target) && !mm.contains(e.target)) {
+        mm.classList.remove('open');
+        hb.classList.remove('open');
+      }
+    });
+  }
+
+  // Scroll shadow
+  const nav = document.getElementById('mainNav');
+  if (nav) {
+    const s = () => nav.classList.toggle('scrolled', window.scrollY > 10);
+    window.addEventListener('scroll', s, { passive: true });
+    s();
+  }
+})();
+</script>
+</body>
+</html>

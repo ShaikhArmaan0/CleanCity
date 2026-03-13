@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Report Waste – CleanCity</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    .report-page{padding-top:var(--nav-height);min-height:100vh;background:var(--gray-50)}
+    .report-container{max-width:720px;margin:0 auto;padding:2.5rem 1.5rem}
+    .report-header{text-align:center;margin-bottom:2.5rem}
+    .report-title{font-family:var(--font-display);font-size:2rem;font-weight:600;color:var(--gray-900);margin-bottom:0.5rem}
+    .report-sub{color:var(--gray-500)}
+    .step-progress{display:flex;align-items:center;margin-bottom:2.5rem;gap:0}
+    .step-prog-item{display:flex;flex-direction:column;align-items:center;gap:0.4rem;flex:1}
+    .step-prog-circle{width:40px;height:40px;border-radius:50%;border:2px solid var(--gray-200);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.875rem;color:var(--gray-400);background:white;transition:all 0.3s;position:relative;z-index:1}
+    .step-prog-circle.active{border-color:var(--green-500);color:var(--green-600);background:var(--green-50)}
+    .step-prog-circle.done{border-color:var(--green-500);background:var(--green-500);color:white}
+    .step-prog-label{font-size:0.72rem;font-weight:600;color:var(--gray-400);transition:color 0.3s}
+    .step-prog-item.active .step-prog-label{color:var(--green-600)}
+    .step-prog-line{flex:1;height:2px;background:var(--gray-200);margin:0 -4px;position:relative;top:-16px;z-index:0;transition:background 0.3s}
+    .step-prog-line.done{background:var(--green-500)}
+    .form-card{background:white;border-radius:var(--radius-xl);box-shadow:var(--shadow-md);padding:2rem;animation:fadeInUp 0.4s ease both}
+    .step-section{display:none}
+    .step-section.active{display:block;animation:fadeInUp 0.35s ease both}
+    .issue-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+    .issue-card{border:2px solid var(--gray-200);border-radius:var(--radius-md);padding:1.25rem 0.75rem;text-align:center;cursor:pointer;transition:all 0.2s}
+    .issue-card:hover{border-color:var(--green-300);background:var(--green-50)}
+    .issue-card.selected{border-color:var(--green-500);background:var(--green-50);transform:scale(1.03)}
+    .issue-card-icon{font-size:2rem;margin-bottom:0.5rem}
+    .issue-card-label{font-size:0.8rem;font-weight:600;color:var(--gray-700)}
+    #map{height:280px;border-radius:var(--radius-md);margin-bottom:1rem;border:1.5px solid var(--gray-200)}
+    .photo-options{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+    .photo-option{border:2px solid var(--gray-200);border-radius:var(--radius-lg);padding:1.75rem 1rem;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--gray-50)}
+    .photo-option:hover{border-color:var(--green-400);background:var(--green-50);transform:translateY(-2px);box-shadow:var(--shadow-md)}
+    .photo-option-icon{font-size:2.5rem;margin-bottom:0.65rem}
+    .photo-option-label{font-weight:700;font-size:0.95rem;color:var(--gray-800);margin-bottom:0.25rem}
+    .photo-option-sub{font-size:0.78rem;color:var(--gray-400)}
+    /* Camera modal */
+    .cam-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;flex-direction:column;align-items:stretch;padding:0}
+    .cam-modal.open{display:flex}
+    .cam-header{display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;flex-shrink:0}
+    .cam-title{color:white;font-weight:600;font-size:0.95rem}
+    .cam-close{background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);color:white;font-size:1.2rem;width:42px;height:42px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .cam-close:hover,.cam-close:active{background:rgba(255,255,255,0.35)}
+    .cam-video-wrap{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#000}
+    .cam-video-wrap video{width:100%;height:100%;object-fit:cover;display:block}
+    .cam-footer{display:flex;align-items:center;justify-content:center;gap:2rem;padding:1.25rem 1rem;flex-shrink:0;background:rgba(0,0,0,0.5)}
+    .cam-snap{width:72px;height:72px;border-radius:50%;background:white;border:4px solid var(--green-500);cursor:pointer;font-size:2rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .cam-snap:active{transform:scale(0.9);background:var(--green-50)}
+    .cam-switch{background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);color:white;font-size:1.3rem;width:50px;height:50px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .cam-switch:active{background:rgba(255,255,255,0.35)}
+    .cam-error{color:#FC8181;font-size:0.88rem;text-align:center;padding:0.5rem 1rem;display:none}
+    .upload-area{border:2px dashed var(--gray-200);border-radius:var(--radius-md);padding:1rem;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--gray-50);font-size:0.82rem;color:var(--gray-400)}
+    .upload-area:hover,.upload-area.drag-over{border-color:var(--green-400);background:var(--green-50);color:var(--green-600)}
+    .image-preview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-top:1rem}
+    .image-preview-item{position:relative;aspect-ratio:1;border-radius:var(--radius-md);overflow:hidden}
+    .image-preview-item img{width:100%;height:100%;object-fit:cover;animation:fadeIn 0.3s ease}
+    .image-preview-remove{position:absolute;top:4px;right:4px;width:22px;height:22px;background:rgba(0,0,0,0.6);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;cursor:pointer}
+    .char-counter{font-size:0.75rem;color:var(--gray-400);text-align:right;margin-top:4px}
+    .char-counter.warn{color:var(--orange)}
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:1rem;background:var(--gray-50);border-radius:var(--radius-md);margin-bottom:1.5rem}
+    .toggle-info h4{font-size:0.9rem;font-weight:600;color:var(--gray-800)}
+    .toggle-info p{font-size:0.8rem;color:var(--gray-500);margin-top:2px}
+    .submit-success{text-align:center;padding:2rem;display:none}
+    .submit-success.show{display:block;animation:fadeInUp 0.4s ease}
+    .success-check{width:80px;height:80px;border-radius:50%;background:var(--green-100);display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin:0 auto 1.25rem}
+    .success-id{display:inline-block;background:var(--green-50);border:1px solid var(--green-200);border-radius:var(--radius-sm);padding:0.5rem 1rem;font-family:monospace;font-size:0.9rem;color:var(--green-700);margin:0.5rem 0 1.5rem;word-break:break-all}
+    .form-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--gray-100)}
+    @media(max-width:600px){.issue-grid{grid-template-columns:repeat(2,1fr)}.image-preview-grid{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+<nav class="navbar scrolled">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo"><div class="nav-logo-icon">♻</div> CleanCity</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="complaints.html">Complaints</a></li>
+      <li><a href="track.html">Track</a></li>
+      <li><a href="report.html" class="active">Report Waste</a></li>
+    </ul>
+    <div class="nav-actions" id="navActions"></div>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">🏠 Home</a>
+  <a href="dashboard.html">📊 Dashboard</a>
+  <a href="complaints.html">📋 Complaints</a>
+  <a href="track.html">🔍 Track</a>
+  <a href="report.html">📢 Report Waste</a>
+  <div class="mobile-divider"></div>
+  <a href="profile.html">👤 Profile</a>
+  <a href="#" onclick="logout()">🚪 Logout</a>
+</div>
+
+<div class="report-page">
+  <div class="report-container">
+    <div class="report-header" style="animation:fadeInUp 0.4s ease both">
+      <h1 class="report-title">📢 Report an Issue</h1>
+      <p class="report-sub">Help keep your city clean by reporting waste and civic issues</p>
+    </div>
+
+    <div class="step-progress">
+      <div class="step-prog-item active" id="prog1"><div class="step-prog-circle active" id="pcirc1">1</div><span class="step-prog-label">Issue Type</span></div>
+      <div class="step-prog-line" id="pline1"></div>
+      <div class="step-prog-item" id="prog2"><div class="step-prog-circle" id="pcirc2">2</div><span class="step-prog-label">Location</span></div>
+      <div class="step-prog-line" id="pline2"></div>
+      <div class="step-prog-item" id="prog3"><div class="step-prog-circle" id="pcirc3">3</div><span class="step-prog-label">Photos</span></div>
+      <div class="step-prog-line" id="pline3"></div>
+      <div class="step-prog-item" id="prog4"><div class="step-prog-circle" id="pcirc4">4</div><span class="step-prog-label">Details</span></div>
+    </div>
+
+    <div class="form-card">
+      <!-- SUCCESS -->
+      <div class="submit-success" id="submitSuccess">
+        <div class="success-check">✅</div>
+        <h2 style="font-family:var(--font-display);font-size:1.6rem;margin-bottom:0.5rem">Report Submitted!</h2>
+        <p style="color:var(--gray-500);margin-bottom:0.75rem">Your complaint has been filed. Save this ID to track it:</p>
+        <div class="success-id" id="successId">—</div>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+          <a href="track.html" class="btn btn-primary" id="trackLink">Track Complaint</a>
+          <a href="complaints.html" class="btn btn-ghost">View All Reports</a>
+        </div>
+      </div>
+
+      <!-- STEP 1 -->
+      <div class="step-section active" id="step1">
+        <h3 style="font-weight:700;margin-bottom:1.25rem;color:var(--gray-800)">What type of issue is it?</h3>
+        <div class="issue-grid">
+          <div class="issue-card" data-value="garbage"><div class="issue-card-icon">🗑️</div><div class="issue-card-label">Garbage Overflow</div></div>
+          <div class="issue-card" data-value="drainage"><div class="issue-card-icon">💧</div><div class="issue-card-label">Drainage Problem</div></div>
+          <div class="issue-card" data-value="illegal_dumping"><div class="issue-card-icon">⚠️</div><div class="issue-card-label">Illegal Dumping</div></div>
+          <div class="issue-card" data-value="broken_infrastructure"><div class="issue-card-icon">🔧</div><div class="issue-card-label">Broken Infrastructure</div></div>
+          <div class="issue-card" data-value="public_hygiene"><div class="issue-card-icon">🧹</div><div class="issue-card-label">Public Hygiene</div></div>
+          <div class="issue-card" data-value="other"><div class="issue-card-icon">📌</div><div class="issue-card-label">Other</div></div>
+        </div>
+        <div class="form-nav"><div></div><button class="btn btn-primary" id="next1Btn" disabled>Next →</button></div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="step-section" id="step2">
+        <h3 style="font-weight:700;margin-bottom:1rem;color:var(--gray-800)">Where is the issue?</h3>
+        <div class="form-group">
+          <label class="form-label">Address / Location *</label>
+          <input type="text" id="addressInput" class="form-input" placeholder="Street, landmark, area...">
+        </div>
+        <div style="display:flex;gap:0.75rem;margin-bottom:0.75rem;flex-wrap:wrap;align-items:center">
+          <button class="btn btn-ghost btn-sm" id="useLocationBtn" type="button">📍 Use Current Location</button>
+          <span id="locationStatus" style="font-size:0.82rem"></span>
+        </div>
+        <div id="map"></div>
+        <p id="mapHint" style="font-size:0.8rem;color:var(--gray-400);margin-bottom:1rem">📌 Tap the map to pin your location · drag the pin to adjust</p>
+        <div class="form-group">
+          <label class="form-label">Region / Locality <span style="color:var(--gray-400);font-weight:400">(e.g. Chembur East, Andheri West)</span></label>
+          <input type="text" id="regionInput" class="form-input" placeholder="Neighbourhood / locality name — auto-filled from map or type manually">
+        </div>
+        <div class="form-nav">
+          <button class="btn btn-ghost" onclick="goToStep(1)">← Back</button>
+          <button class="btn btn-primary" id="next2Btn">Next →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="step-section" id="step3">
+        <h3 style="font-weight:700;margin-bottom:0.25rem;color:var(--gray-800)">Add Photos <span style="color:#e53e3e">*</span></h3>
+        <p style="font-size:0.82rem;color:var(--gray-500);margin-bottom:1.25rem">At least 1 photo required · max 5 · JPG or PNG · up to 5 MB each</p>
+
+        <!-- Two equal option cards -->
+        <div class="photo-options">
+          <div class="photo-option" onclick="document.getElementById('fileInput').click()">
+            <div class="photo-option-icon">🖼️</div>
+            <div class="photo-option-label">Upload from Gallery</div>
+            <div class="photo-option-sub">Browse photos on your device</div>
+          </div>
+          <div class="photo-option" onclick="openCamera()">
+            <div class="photo-option-icon">📷</div>
+            <div class="photo-option-label">Take a Photo</div>
+            <div class="photo-option-sub">Open camera and snap now</div>
+          </div>
+        </div>
+
+        <!-- Hidden inputs -->
+        <input type="file" id="fileInput"   accept="image/*" multiple style="display:none">
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
+
+        <!-- Drag & drop secondary zone -->
+        <div class="upload-area" id="uploadArea">📂 Or drag &amp; drop photos here</div>
+
+        <!-- Counter -->
+        <div style="margin-top:0.85rem;margin-bottom:0.25rem">
+          <span id="photoCounter" style="font-size:0.85rem;color:var(--gray-400);font-weight:600">0 / 5 photos added</span>
+        </div>
+
+        <div class="image-preview-grid" id="imagePreviewGrid"></div>
+        <div class="form-nav">
+          <button class="btn btn-ghost" onclick="goToStep(2)">← Back</button>
+          <button class="btn btn-primary" id="next3Btn" disabled>Next →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="step-section" id="step4">
+        <h3 style="font-weight:700;margin-bottom:1rem;color:var(--gray-800)">Tell us more</h3>
+        <div class="form-group">
+          <label class="form-label">Description *</label>
+          <textarea id="descInput" class="form-input form-textarea" placeholder="Describe the issue — size, severity, how long it has been there..." maxlength="500"></textarea>
+          <div class="char-counter" id="charCount">0 / 500</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Priority</label>
+          <select id="prioritySelect" class="form-input">
+            <option value="normal">Normal</option>
+            <option value="high">High</option>
+            <option value="urgent">Urgent</option>
+          </select>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <h4>Post Publicly</h4>
+            <p>Allow other citizens to see and vote on this report</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="publicToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="form-nav">
+          <button class="btn btn-ghost" onclick="goToStep(3)">← Back</button>
+          <button class="btn btn-primary" id="submitBtn">Submit Report 📢</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<!-- Camera modal — must be BEFORE scripts so DOM exists when JS runs -->
+<div class="cam-modal" id="camModal">
+  <div class="cam-header">
+    <span class="cam-title">📷 Camera · <span id="camFacing">back camera</span></span>
+    <button class="cam-close" id="camClose" onclick="closeCamera()" title="Close">✕</button>
+  </div>
+  <p class="cam-error" id="camError"></p>
+  <div class="cam-video-wrap">
+    <video id="camVideo" autoplay playsinline muted></video>
+  </div>
+  <canvas id="camCanvas" style="display:none"></canvas>
+  <div class="cam-footer">
+    <button class="cam-switch" id="camSwitch" onclick="camSwitchFacing()" title="Flip camera">🔄</button>
+    <button class="cam-snap"   id="camSnap"   onclick="camTakePhoto()"   title="Take photo">📷</button>
+    <div style="width:50px"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/core/api.config.js?v=12"></script>
+<script src="js/ui/report.ui.js?v=11"></script>
+</body>
+</html>

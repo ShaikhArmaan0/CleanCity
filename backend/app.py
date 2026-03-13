@@ -17,7 +17,13 @@ def create_app():
 
     # Init extensions
     jwt.init_app(app)
-    cors.init_app(app, resources={r"/api/*": {"origins": "*"}})
+    cors.init_app(app, resources={r"/api/*": {"origins": [
+        "http://localhost:3000",
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
+        "http://127.0.0.1:3000",
+        "https://yourusername.github.io",  # ← replace with your GitHub username
+    ]}})
 
     # Init MongoDB
     init_db(app.config["MONGO_URI"])

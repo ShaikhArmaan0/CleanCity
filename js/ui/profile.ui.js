@@ -3,7 +3,7 @@
    ============================================================ */
 document.addEventListener('DOMContentLoaded', async function () {
 
-if (!Auth.requireAuth('../pages/login.html')) return;
+if (!Auth.requireAuth('login.html')) return;
 
 const $ = id => document.getElementById(id);
 

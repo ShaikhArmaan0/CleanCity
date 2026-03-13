@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Track Complaint – CleanCity</title>
-  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="css/styles.css">
   <style>
     .track-page{padding-top:var(--nav-height);min-height:100vh;background:var(--gray-50)}
     .track-hero{background:linear-gradient(135deg,var(--green-700),var(--green-900));padding:4rem 0;text-align:center;color:white}
@@ -43,6 +43,7 @@
     <a href="index.html" class="nav-logo"><div class="nav-logo-icon">♻</div> CleanCity</a>
     <ul class="nav-links">
       <li><a href="index.html">Home</a></li>
+      
       <li><a href="complaints.html">Complaints</a></li>
       <li><a href="track.html" class="active">Track</a></li>
       <li><a href="report.html">Report Waste</a></li>
@@ -53,9 +54,13 @@
 </nav>
 <div class="mobile-menu" id="mobileMenu">
   <a href="index.html">🏠 Home</a>
+  <a href="dashboard.html">📊 Dashboard</a>
   <a href="complaints.html">📋 Complaints</a>
   <a href="track.html">🔍 Track</a>
   <a href="report.html">📢 Report Waste</a>
+  <div class="mobile-divider"></div>
+  <a href="profile.html">👤 Profile</a>
+  <a href="#" onclick="logout()">🚪 Logout</a>
 </div>
 
 <div class="track-page">
@@ -73,7 +78,7 @@
 
 
 
-<script src="../js/core/api.config.js?v=2"></script>
-<script src="../js/ui/track.ui.js"></script>
+<script src="js/core/api.config.js?v=12"></script>
+<script src="js/ui/track.ui.js?v=11"></script>
 </body>
 </html>

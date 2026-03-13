@@ -7,7 +7,7 @@ const _host = window.location.hostname;
 const _isLocal = _host === "localhost" || _host === "127.0.0.1";
 const API_BASE_URL = _isLocal
   ? "http://localhost:5000/api"
-  : `http://${_host}:5000/api`;
+  : "https://YOUR-APP-NAME.onrender.com/api";  // ← replace with your Render URL
 
 const API = {
   auth: {
@@ -90,7 +90,7 @@ async function http(url, options = {}) {
       localStorage.removeItem("cc_user");
       if (!window.location.pathname.includes("login")) {
         const isAdminPage = window.location.pathname.includes("admin");
-        window.location.href = isAdminPage ? "admin-login.html" : "../pages/login.html";
+        window.location.href = isAdminPage ? "admin-login.html" : "login.html";
       }
     }
     const err = new Error(data.error || data.message || "Request failed");
@@ -164,7 +164,7 @@ const Auth = {
   clearSession() {
     ["cc_token", "cc_user", "cc_temp_token", "cc_temp_phone"].forEach(k => localStorage.removeItem(k));
   },
-  requireAuth(redirect = "../pages/login.html") {
+  requireAuth(redirect = "login.html") {
     if (!this.isLoggedIn()) { window.location.href = redirect; return false; }
     return true;
   },

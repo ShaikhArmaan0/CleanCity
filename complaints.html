@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>City Complaints – CleanCity</title>
-  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="css/styles.css">
   <style>
     .complaints-page{padding-top:var(--nav-height);min-height:100vh;background:var(--gray-50)}
     .complaints-header-inner{display:flex;align-items:flex-start;justify-content:space-between;gap:1.5rem;flex-wrap:wrap}
@@ -67,25 +67,16 @@
   </style>
 </head>
 <body>
-<nav class="navbar scrolled" style="background:white">
+<nav class="navbar" id="mainNav">
   <div class="nav-container">
     <a href="index.html" class="nav-logo"><div class="nav-logo-icon">♻</div> CleanCity</a>
-    <ul class="nav-links">
-      <li><a href="index.html">Home</a></li>
-      <li><a href="complaints.html" class="active">Complaints</a></li>
-      <li><a href="track.html">Track</a></li>
-      <li><a href="report.html">Report Waste</a></li>
-    </ul>
+    <ul class="nav-links" id="navLinks"></ul>
     <div class="nav-actions" id="navActions"></div>
-    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
-<div class="mobile-menu" id="mobileMenu">
-  <a href="index.html">🏠 Home</a>
-  <a href="complaints.html">📋 Complaints</a>
-  <a href="track.html">🔍 Track</a>
-  <a href="report.html">📢 Report Waste</a>
-</div>
+<div class="mobile-menu" id="mobileMenu"></div>
+  
 
 <div class="complaints-page">
   <div style="background:white;border-bottom:1px solid var(--gray-100);padding:2rem 0">
@@ -144,7 +135,90 @@
 
 
 
-<script src="../js/core/api.config.js?v=10"></script>
-<script src="../js/ui/complaints.ui.js?v=10"></script>
+<script src="js/core/api.config.js?v=12"></script>
+<script src="js/ui/complaints.ui.js?v=12"></script>
+<script>
+// ── Unified Nav ─────────────────────────────────────────────
+(function initNav() {
+  const loggedIn = (typeof Auth !== 'undefined') && Auth.isLoggedIn();
+  const user     = loggedIn ? Auth.getUser() : null;
+  const name     = user ? (user.name || 'Account').split(' ')[0] : '';
+
+  // Desktop: build nav-links dynamically (no hardcoded Dashboard in HTML)
+  const nl = document.getElementById('navLinks');
+  if (nl) {
+    
+    nl.innerHTML = `
+      <li><a href="index.html">Home</a></li>
+      
+      <li><a href="complaints.html">Complaints</a></li>
+      <li><a href="track.html">Track</a></li>
+      <li><a href="report.html">Report Waste</a></li>
+    `;
+    // Mark the active link
+    const page = location.pathname.split('/').pop() || 'index.html';
+    nl.querySelectorAll('a').forEach(a => {
+      if (a.getAttribute('href') === page ||
+          (page === '' && a.getAttribute('href') === 'index.html'))
+        a.classList.add('active');
+    });
+  }
+
+  // Desktop: nav-actions (right side)
+  const na = document.getElementById('navActions');
+  if (na) {
+    na.innerHTML = loggedIn
+      ? `<a href="profile.html" class="btn btn-ghost btn-sm">👤 ${name}</a>
+         <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>`
+      : `<a href="login.html"  class="btn btn-secondary btn-sm">Login</a>
+         <a href="report.html" class="btn btn-primary   btn-sm">Report Now</a>`;
+  }
+
+  // Mobile menu — fully dynamic, no stale hardcoded links
+  const mm = document.getElementById('mobileMenu');
+  if (mm) {
+    mm.innerHTML = loggedIn
+      ? `<a href="index.html">🏠 Home</a>
+         <a href="dashboard.html">📊 Dashboard</a>
+         <a href="complaints.html">📋 Complaints</a>
+         <a href="track.html">🔍 Track</a>
+         <a href="report.html">📢 Report Waste</a>
+         <div class="mobile-divider"></div>
+         <a href="profile.html">👤 Profile</a>
+         <a href="#" onclick="logout()">🚪 Logout</a>`
+      : `<a href="index.html">🏠 Home</a>
+         <a href="complaints.html">📋 Complaints</a>
+         <a href="track.html">🔍 Track</a>
+         <a href="report.html">📢 Report Waste</a>
+         <div class="mobile-divider"></div>
+         <a href="login.html">🔑 Login</a>
+         <a href="report.html">📢 Report Now</a>`;
+  }
+
+  // Hamburger toggle
+  const hb = document.getElementById('hamburger');
+  if (hb && mm) {
+    hb.addEventListener('click', e => {
+      e.stopPropagation();
+      mm.classList.toggle('open');
+      hb.classList.toggle('open');
+    });
+    document.addEventListener('click', e => {
+      if (!hb.contains(e.target) && !mm.contains(e.target)) {
+        mm.classList.remove('open');
+        hb.classList.remove('open');
+      }
+    });
+  }
+
+  // Scroll shadow
+  const nav = document.getElementById('mainNav');
+  if (nav) {
+    const s = () => nav.classList.toggle('scrolled', window.scrollY > 10);
+    window.addEventListener('scroll', s, { passive: true });
+    s();
+  }
+})();
+</script>
 </body>
 </html>
