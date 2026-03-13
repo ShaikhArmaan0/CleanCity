@@ -14,14 +14,21 @@ def create_app():
     app.config.from_object(Config)
 
     jwt.init_app(app)
-    cors.init_app(app, resources={r"/api/*": {"origins": [
-        "http://localhost:3000",
-        "http://localhost:5500",
-        "http://127.0.0.1:5500",
-        "http://127.0.0.1:3000",
-        "https://shaikharmaan0.github.io",
-    ]}})
+    cors.init_app(app, supports_credentials=True, resources={r"/api/*": {"origins": "*"}})
     init_db(app)
+
+    # Ensure CORS headers on every response including errors
+    @app.after_request
+    def add_cors_headers(response):
+        response.headers["Access-Control-Allow-Origin"]  = "*"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+        return response
+
+    @app.route("/api/", methods=["OPTIONS"])
+    @app.route("/api/<path:path>", methods=["OPTIONS"])
+    def handle_options(path=""):
+        return "", 204
 
     app.register_blueprint(auth_bp,         url_prefix="/api/auth")
     app.register_blueprint(complaint_bp,    url_prefix="/api/complaints")
