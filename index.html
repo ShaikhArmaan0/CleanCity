@@ -269,7 +269,7 @@
 
 
 
-<script src="js/core/api.config.js?v=12"></script>
+<script src="js/core/api.config.js?v=13"></script>
 <script src="js/ui/index.ui.js?v=11"></script>
 
 
@@ -286,7 +286,6 @@
   if (nl) {
     nl.innerHTML = `
       <li><a href="index.html">Home</a></li>
-      
       <li><a href="complaints.html">Complaints</a></li>
       <li><a href="track.html">Track</a></li>
       <li><a href="report.html">Report Waste</a></li>
@@ -304,7 +303,8 @@
   const na = document.getElementById('navActions');
   if (na) {
     na.innerHTML = loggedIn
-      ? `<a href="profile.html" class="btn btn-ghost btn-sm">👤 ${name}</a>
+      ? `<a href="dashboard.html" class="btn btn-ghost btn-sm">📊 Dashboard</a>
+         <a href="profile.html" class="btn btn-ghost btn-sm">👤 ${name}</a>
          <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>`
       : `<a href="login.html"  class="btn btn-secondary btn-sm">Login</a>
          <a href="report.html" class="btn btn-primary   btn-sm">Report Now</a>`;
