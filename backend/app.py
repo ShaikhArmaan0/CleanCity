@@ -25,6 +25,14 @@ def create_app():
         response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
         return response
 
+    @app.route("/")
+    def health():
+        return jsonify({
+            "status": "live",
+            "app": "CleanCity API",
+            "message": "🌿 CleanCity backend is running!"
+        }), 200
+
     @app.route("/api/", methods=["OPTIONS"])
     @app.route("/api/<path:path>", methods=["OPTIONS"])
     def handle_options(path=""):
