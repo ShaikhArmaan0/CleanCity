@@ -8,6 +8,7 @@ from routes.vote_routes import vote_bp
 from routes.user_routes import user_bp
 from routes.notification_routes import notification_bp
 from routes.admin_routes import admin_bp
+from routes.comment_routes import comment_bp
 
 def create_app():
     app = Flask(__name__)
@@ -44,6 +45,7 @@ def create_app():
     app.register_blueprint(user_bp,         url_prefix="/api/users")
     app.register_blueprint(notification_bp, url_prefix="/api/notifications")
     app.register_blueprint(admin_bp,        url_prefix="/api/admin")
+    app.register_blueprint(comment_bp,      url_prefix="/api/comments")
 
     return app
 
